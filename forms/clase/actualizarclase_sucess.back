@@ -1,0 +1,25 @@
+<?php
+	include("../../class/ultimatemysql/mysql.class.php");
+	include("../../class/MySqlClass.php");
+	$conx = new ConxMySQL("localhost","root","","appacademy");
+	$iddocente = $_POST['iddocente'];
+	$idaula = $_POST['aula'];
+	$idmateria = $_POST['materia'];
+	$aniolectivo = $_POST['aniolect'];
+	$ih = $_POST['ih'];
+	
+	$values["idmateria"]  = MySQL::SQLValue($idmateria);
+	$values["idaula"] = MySQL::SQLValue($idaula);
+	$values["ih"] = MySQL::SQLValue($ih);
+	$values["aniolectivo"] = MySQL::SQLValue($aniolectivo);
+	$valueswhere1['iddocente']= MySQL::SQLValue($iddocente);
+	$valueswhere1['idmateria']= MySQL::SQLValue($idmateria);
+	$valueswhere1['idaula']= MySQL::SQLValue($idaula);
+	$valueswhere1['aniolectivo']= MySQL::SQLValue($aniolectivo);
+	$sqlupdate=MySQL::BuildSQLUpdate("clase", $values, $valueswhere1);
+	$sqlduplicateentry = "SELECT * FROM clase WHERE idmateria='$idmateria' AND idaula='$idaula' AND iddocente='$iddocente' AND aniolectivo='$aniolectivo'";
+	$consulta5 = $conx->query($sqlupdate);
+	echo "<span class='small'><img src='../../images/ok.png' width='30' height='30' />Clase actualizada con exito.</span>";
+				
+
+?>

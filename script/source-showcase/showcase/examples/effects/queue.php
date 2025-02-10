@@ -1,0 +1,3 @@
+<pre>
+  YsJQuery::queue()
+</pre>

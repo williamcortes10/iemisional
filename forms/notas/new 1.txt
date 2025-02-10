@@ -1,0 +1,16 @@
+CREATE TEMPORARY TABLE notasfinales (idestudiante_fk varchar(11) NOT NULL, idasignatura_fk int(2) NOT NULL, semestre int(1) NOT NULL, nota float NOT NULL,  aniolectivo int(4) NOT NULL  )
+//promedios 1er semestre
+INSERT INTO notasfinales (idestudiante_fk,idasignatura_fk, semestre, nota, aniolectivo )
+SELECT
+  notas.idestudiante,
+  notas.idmateria,
+  1 AS semestre1,
+  ROUND(AVG(notas.vn), 2) AS promedio,
+  notas.aniolectivo
+FROM matricula
+  INNER JOIN notas
+    ON matricula.idestudiante = notas.idestudiante AND matricula.aniolectivo = notas.aniolectivo
+WHERE matricula.periodo = 0 AND matricula.tipo_matricula = 'R' AND matricula.aniolectivo = 2016 AND matricula.idaula = 1 AND 
+  (notas.periodo >= 1 AND notas.periodo<=2)
+GROUP BY notas.idestudiante,
+         notas.idmateria;

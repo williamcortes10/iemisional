@@ -1,0 +1,53 @@
+PARA DUPLICAR NOTAS 
+
+INSERT INTO notas SELECT DISTINCT n.idestudiante, 2, n.vn, n.fj, n.fsj, n.comportamiento, n.observaciones, n.tipo_nota, n.aniolectivo, n.idmateria FROM estudiante e, notas n, matricula m 
+WHERE e.idestudiante=n.idestudiante AND m.idestudiante=n.idestudiante
+AND m.idaula=59
+AND n.periodo=4 AND m.periodo='0' 
+AND n.aniolectivo=2015 AND m.aniolectivo=n.aniolectivo
+AND n.idmateria=3
+AND m.tipo_matricula='R' AND n.tipo_nota=m.tipo_matricula
+ORDER BY e.apellido1, e.apellido2, e.nombre1, e.nombre2 DESC
+
+PARA DUPLICAR A LOS QUE NO TIENE 
+INSERT INTO notas
+SELECT DISTINCT n.idestudiante, 1, n.vn, n.fj, n.fsj, n.comportamiento, n.observaciones, n.tipo_nota, n.aniolectivo, n.idmateria
+FROM estudiante e, notas n, matricula m
+WHERE e.idestudiante = n.idestudiante
+AND m.idestudiante = n.idestudiante
+AND m.idaula =65
+AND e.habilitado =  'S'
+AND n.periodo =3
+AND m.periodo =  '0'
+AND n.aniolectivo =2015
+AND m.aniolectivo = n.aniolectivo
+AND n.idmateria =12
+AND m.tipo_matricula =  'R'
+AND n.tipo_nota = m.tipo_matricula
+AND n.idestudiante NOT 
+IN (
+
+SELECT DISTINCT n1.idestudiante
+FROM estudiante e1, notas n1, matricula m1
+WHERE e1.idestudiante = n1.idestudiante
+AND m1.idestudiante = n1.idestudiante
+AND m1.idaula =65
+AND n1.periodo =1
+AND m1.periodo =  '0'
+AND n1.aniolectivo =2015
+AND m1.aniolectivo = n1.aniolectivo
+AND n1.idmateria =12
+AND m1.tipo_matricula =  'R'
+)
+ORDER BY e.apellido1, e.apellido2, e.nombre1, e.nombre2 DESC
+
+PARA DUPLICAR COMPENTENCIAS
+
+INSERT INTO indicadoresestudiante SELECT DISTINCT n.idindicador, n.idestudiante,n.aniolectivo, 2 , n.nivel_aprendizaje, n.idmateria FROM estudiante e, indicadoresestudiante n, matricula m 
+WHERE e.idestudiante=n.idestudiante AND m.idestudiante=n.idestudiante
+AND m.idaula=59
+AND n.periodo=4 AND m.periodo='0' 
+AND n.aniolectivo=2015 AND m.aniolectivo=n.aniolectivo
+AND n.idmateria=3
+AND m.tipo_matricula='R'
+ORDER BY e.apellido1, e.apellido2, e.nombre1, e.nombre2 DESC

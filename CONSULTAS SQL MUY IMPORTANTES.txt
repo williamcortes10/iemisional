@@ -1,0 +1,13 @@
+CONSULTA SQL QUE PERMITE ACTUALIZAR EL IDMATERIA SEGUN EL DOCENTE Y MATERIA DE LOS INDICADORES QUE SELECCIONO
+//---------
+UPDATE clase c, indicadoresboletin ib, estandares e, plan_curricular pc, materia m
+SET ib.idmateria=c.idmateria WHERE c.iddocente=ib.iddocente  AND c.aniolectivo=2015 AND c.aniolectivo=ib.aniolectivo AND ib.idindicador=pc.consecutivo
+AND pc.estandarbc=e.codigo AND c.idmateria=m.idmateria AND m.idarea_fk IN (SELECT a.idarea_fk FROM materia a WHERE a.idmateria=e.idmateria_fk)
+//-----
+
+CONSULTA QUE ACTUALIZA EL IDMATERIA SEGUN EL DOCENTE DE AULA Y EL ESTUDIANTE 
+//----
+SET ie.idmateria=ib.idmateria WHERE c.iddocente=ib.iddocente  AND c.aniolectivo=ib.aniolectivo AND ib.periodo=ie.periodo AND ib.aniolectivo=ie.aniolectivo 
+AND ie.idindicador=ib.idindicador 
+AND ie.idestudiante=me.idestudiante AND me.aniolectivo=ie.aniolectivo AND c.aniolectivo=ie.aniolectivo AND me.idaula=c.idaula
+//-----

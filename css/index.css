@@ -1,0 +1,45 @@
+body {
+  padding-top: 50px;
+}
+.starter-template {
+  padding: 40px 15px;
+  text-align: center;
+}
+/* Main marketing message and sign up button */
+.jumbotron {
+  text-align: center;
+  border-bottom: 1px solid #e5e5e5;
+   max-width: 830px;
+}
+.jumbotron .btn {
+  padding: 14px 24px;
+  font-size: 21px;
+}
+
+/* Remove the bottom border on the jumbotron for visual effect */
+.jumbotron {
+	border-bottom: 0;
+}
+.glypicon-refresh-animate{
+	-animation: spin .7s infinite linear;
+	-webkit-animation: spin .7s infinite linear;
+}
+@-webkit-keyframes spin2{
+	from { -webkit-transform: rotate (0deg);}
+	to { -webkit-transform: rotate (360deg);}
+}
+.forminsert {
+  text-align: center;
+  max-width: 400px;
+  text-align:left;
+}
+.containertable  {
+  text-align: center;
+  max-width: 1200px;
+ 
+}
+.containertablecalificar  {
+  text-align: center;
+  max-width: 1200px;
+ 
+}

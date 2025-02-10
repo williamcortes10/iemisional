@@ -1,0 +1,1246 @@
+
+<?php
+session_start();
+include('../../class/MySqlClass.php');
+
+$conx = new ConxMySQL("localhost","root","","appacademy");
+$sql = "SELECT valor FROM appconfig WHERE item='ie'";
+$consulta = $conx->query($sql);
+$records = $conx->records_array($consulta);
+$ie= $records['valor'];
+$sqlaaula = "SELECT descripcion, grupo, jornada FROM aula WHERE idaula = ".$_POST["aula"];
+$consultaaula = $conx->query($sqlaaula);    
+$recordsaula = $conx->records_array($consultaaula);
+if($recordsaula['jornada']=='M'){
+$jornada="MAÑANA";
+}else{
+$jornada="TARDE";
+
+}
+$aula=$recordsaula['descripcion']."-".$recordsaula['grupo']."-".$jornada;
+$sql = "SELECT valor FROM appconfig WHERE item = 'pages'";
+$consulta = $conx->query($sql);    
+$records = $conx->records_array($consulta);
+$pages = $records['valor'];
+$sql = "SELECT valor FROM appconfig WHERE item = 'convenciones'";
+$consulta = $conx->query($sql);    
+$records = $conx->records_array($consulta);
+$convencion = $records['valor'];
+$p=$_POST["periodo"];
+$al=$_POST["aniolect"];
+?>
+<html>
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
+<head>
+<title><?php echo $ie."-BOLETIN GRADO $aula-PERIODO $p - $al"; ?></title>
+<link  href="http://fonts.googleapis.com/css?family=Cabin+Sketch:bold" rel="stylesheet" type="text/css" >
+<link  href="http://fonts.googleapis.com/css?family=Lobster:regular" rel="stylesheet" type="text/css" >
+<link  href="http://fonts.googleapis.com/css?family=Tangerine:regular,bold" rel="stylesheet" type="text/css" >
+<!-- Custom styles for this template -->
+<link rel="stylesheet" type="text/css" href="../../css/boletin.css" media="print, screen">
+<script src="../../js/jquery.js"></script>
+<!-- Todos los plugins JavaScript de Bootstrap (también puedes
+	 incluir archivos JavaScript individuales de los únicos
+	 plugins que utilices) -->
+</head>
+<body>
+<div>
+<?php
+//include("../../class/phpdocx/classes/createDocx.inc");
+//$docx = new CreateDocx();
+$text = 'Lorem ipsum dolor sit amet, consectetur adipisicing elit, ' .
+'sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut ' .
+'enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut' .
+'aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit ' .
+'in voluptate velit esse cillum dolore eu fugiat nulla pariatur. ' .
+'Excepteur sint occaecat cupidatat non proident, sunt in culpa qui ' .
+'officia deserunt mollit anim id est laborum.';
+$paramsText = array(
+'b' => 'single',
+'font' => 'Arial'
+);
+//$docx->addText($text, $paramsText);$docx->createDocx('example_text');
+include("../../class/ultimatemysql/mysql.class.php");
+$conx = new ConxMySQL("localhost","root","","appacademy");
+//-----------------------------datos basicos de colegio
+
+$sql = "SELECT valor FROM appconfig WHERE item = 'ie'";
+$consulta = $conx->query($sql);    
+$records = $conx->records_array($consulta);
+$ie = $records['valor'];
+$sql = "SELECT valor FROM appconfig WHERE item = 'nrector'";
+$consulta = $conx->query($sql);    
+$records = $conx->records_array($consulta);
+$nrector = $records['valor'];
+$sql = "SELECT valor FROM appconfig WHERE item = 'nca'";
+$consulta = $conx->query($sql);    
+$records = $conx->records_array($consulta);
+$nca = $records['valor'];
+$sql = "SELECT valor FROM appconfig WHERE item = 'Lema'";
+$consulta = $conx->query($sql);    
+$records = $conx->records_array($consulta);
+$lema = $records['valor'];
+$sql = "SELECT valor FROM appconfig WHERE item = 'ciudad'";
+$consulta = $conx->query($sql);    
+$records = $conx->records_array($consulta);
+$ciudad = $records['valor'];
+$sql = "SELECT valor FROM appconfig WHERE item = 'departamento'";
+$consulta = $conx->query($sql);    
+$records = $conx->records_array($consulta);
+$departamento = $records['valor'];
+
+$localizacion=$ciudad." ".$departamento;
+
+//-----------------------------------------------------
+//mysql_set_charset('utf8',$conx->conexion);
+$idaula = $_POST['aula'];
+$periodo= $_POST['periodo'];
+$aniolect= $_POST['aniolect'];
+$formato= $_POST['formato'];
+function String_oracion($string){
+ $stringReturn="";
+ $arraySplit = explode('.', $string);
+ for($i=0; $i<count($arraySplit); $i++){
+	
+	//$stringReturn[$i]=ucfirst($arraySplit[$i]);
+	$arraySplit[$i]=ucfirst(strtolower(trim($arraySplit[$i])));
+ }
+ $stringReturn = implode(". ", $arraySplit);
+ $stringReturn=str_replace("Ó","ó",$stringReturn);
+ $stringReturn=str_replace("Í","í",$stringReturn);
+ $stringReturn=str_replace("Á","á",$stringReturn);
+ $stringReturn=str_replace("É","é",$stringReturn);
+ $stringReturn=str_replace("Ú","ú",$stringReturn);
+ $stringReturn=str_replace("Ñ","ñ",$stringReturn);
+ $stringReturn=str_replace(" dios"," DIOS",$stringReturn);
+ $stringReturn=str_replace(" jesús"," JESÚS",$stringReturn);
+ return $stringReturn;
+}
+//aula
+$sqlaaula = "SELECT descripcion, idaula, grado, grupo, jornada FROM aula WHERE idaula = $idaula";
+$consultaaula = $conx->query($sqlaaula);    
+$recordsaula = $conx->records_array($consultaaula);
+if($recordsaula['jornada']=="M"){
+	$jornada="MAÑANA";
+}else{
+	$jornada="TARDE";
+}
+$grado=$recordsaula['descripcion']."-".$recordsaula['grupo']."-".$jornada;
+$grado_int=$recordsaula['grado'];
+$idaula=$recordsaula['idaula'];
+//escala de notas
+$existeescala=0;
+$sqlrc = "SELECT * FROM escala_de_calificacion WHERE aniolectivo = $aniolect";
+$consultarc = $conx->query($sqlrc);    
+while($recordsrc = $conx->records_array($consultarc)){
+
+    switch($recordsrc['tipo_escala']){
+		case "DS": 	$rcsmin = $recordsrc['rango_inferior'];
+					$rcsmax = $recordsrc['rango_superior'];
+					break;
+				
+		case "DA": 	$rcamin = $recordsrc['rango_inferior'];
+					$rcamax = $recordsrc['rango_superior'];
+					break;
+		
+		case "DB": 	$rcbmin = $recordsrc['rango_inferior'];
+					$rcbmax = $recordsrc['rango_superior'];
+					break;
+		case "D-": 	$rcbamin = $recordsrc['rango_inferior'];
+					$rcbamax = $recordsrc['rango_superior'];
+					break;
+		default: break;
+	}
+    $existeescala=1;
+}
+//CALCULAR PUESTOS ALGORITMO 1
+function puestoPeriodo($id, $idaula, $aniolectivo, $periodo){
+$conxp = new ConxMySQL("localhost","root","","appacademy");
+$sqlarraypuesto="	
+					SELECT @rownum := @rownum +1 AS Puesto, ROUND( AVG( n.vn ) , 2 ) AS Promedio, n.idestudiante
+					FROM notas n, matricula m, estudiante e
+					WHERE n.idestudiante = m.idestudiante
+					AND n.idestudiante=e.idestudiante
+					AND e.habilitado='S'
+					AND m.idaula =  '$idaula'
+					AND m.aniolectivo =$aniolectivo
+					AND m.aniolectivo = n.aniolectivo
+					AND m.tipo_matricula = 'R'
+					AND n.periodo = '$periodo'
+					GROUP BY n.idestudiante
+					ORDER BY Promedio DESC;
+					";
+	$consultapuestoarray = $conxp->query($sqlarraypuesto);
+	$countpuesto=1;
+
+	while($recordspuestoarray = $conxp->records_array($consultapuestoarray)){
+		$datos[] = $recordspuestoarray;
+	}
+	foreach($datos as $valor){
+		$valor[0]=$countpuesto++;
+		$datos2[] = $valor;
+		$datos3[] = $valor;
+	}
+	$valorant=0;
+	$nvPuesto=1;
+	foreach($datos2 as $valor){
+		foreach($datos3 as $valor2){
+			if($valor[1]==$valor2[1]){
+				$nvPuesto=$valor2[0];break;
+			}
+		
+		}
+		$valor[0]=$nvPuesto;
+		$datos4[] = $valor;
+	}
+	foreach($datos4 as $valor3){
+		if($id==$valor3[2]){
+			$nvPuesto=$valor3[0];break;
+		}
+	}
+    return $nvPuesto;
+    
+}
+//CALCULAR PUESTOS ALGORITMO 2
+function puestoPeriodoAlg2($id, $idaula, $aniolectivo, $periodo){
+$conxp = new ConxMySQL("localhost","root","","appacademy");
+	///calcular tabla de promedios
+	$sqlarraypuesto="	
+					SELECT DISTINCT ROUND( AVG( n.vn ) , 2 ) AS Promedio 
+					FROM notas n, matricula m, estudiante e
+					WHERE n.idestudiante = m.idestudiante
+					AND n.idestudiante=e.idestudiante
+					AND e.habilitado='S'
+					AND m.idaula =  '$idaula'
+					AND n.idmateria!=27
+					AND m.aniolectivo =$aniolectivo
+					AND m.aniolectivo = n.aniolectivo
+					AND m.tipo_matricula = 'R'
+					AND n.periodo = '$periodo'
+					GROUP BY n.idestudiante
+					ORDER BY Promedio DESC;
+					";
+	$consultapuestoarray = $conxp->query($sqlarraypuesto);
+	//consultar promedio de estudiante a buscar
+	$sqlarraypuestoEst="	
+					SELECT ROUND( AVG( n.vn ) , 2 ) AS Promedio 
+					FROM notas n, matricula m, estudiante e
+					WHERE n.idestudiante = m.idestudiante
+					AND n.idestudiante=e.idestudiante
+					AND n.idestudiante='$id'
+					AND e.habilitado='S'
+					AND n.idmateria!=27
+					AND m.idaula =  '$idaula'
+					AND m.aniolectivo =$aniolectivo
+					AND m.aniolectivo = n.aniolectivo
+					AND m.tipo_matricula = 'R'
+					AND n.periodo = '$periodo'
+					GROUP BY n.idestudiante
+					ORDER BY Promedio DESC;
+					";
+	$consultapuestoarrayEst = $conxp->query($sqlarraypuestoEst);
+	$recordspuestoarrayEst = $conxp->records_array($consultapuestoarrayEst);
+	$promEst=$recordspuestoarrayEst['Promedio'];
+	//fin consulta promedio estudiante
+	//ubicando puesto segun promedio
+	$countpuesto=1;
+	while($recordspuestoarray = $conxp->records_array($consultapuestoarray)){
+		if($recordspuestoarray['Promedio']==$promEst){
+			break;
+		}else{
+			$countpuesto++;
+		}
+	}
+	//fin ubicar puesto
+	
+    return $countpuesto;
+    
+}
+function puestoAnioAlg2($id, $idaula, $aniolectivo, $periodo){
+$conxp = new ConxMySQL("localhost","root","","appacademy");
+	///calcular tabla de promedios
+	$sqlarraypuesto="	
+					SELECT DISTINCT ROUND( AVG( n.vn ) , 3 ) AS Promedio 
+					FROM notas n, matricula m, estudiante e
+					WHERE n.idestudiante = m.idestudiante
+					AND n.idestudiante=e.idestudiante
+					AND e.habilitado='S'
+					AND m.idaula =  '$idaula'
+					AND n.idmateria!=27
+					AND m.aniolectivo =$aniolectivo
+					AND m.aniolectivo = n.aniolectivo
+					AND m.tipo_matricula = 'R'
+					AND n.periodo <= '$periodo'
+					GROUP BY n.idestudiante
+					ORDER BY Promedio DESC;
+					";
+	$consultapuestoarray = $conxp->query($sqlarraypuesto);
+	//consultar promedio de estudiante a buscar
+	$sqlarraypuestoEst="	
+					SELECT ROUND( AVG( n.vn ) , 3 ) AS Promedio 
+					FROM notas n, matricula m, estudiante e
+					WHERE n.idestudiante = m.idestudiante
+					AND n.idestudiante=e.idestudiante
+					AND n.idestudiante='$id'
+					AND e.habilitado='S'
+					AND m.idaula =  '$idaula'
+					AND n.idmateria!=27
+					AND m.aniolectivo =$aniolectivo
+					AND m.aniolectivo = n.aniolectivo
+					AND m.tipo_matricula = 'R'
+					AND n.periodo <= '$periodo'
+					GROUP BY n.idestudiante
+					ORDER BY Promedio DESC;
+					";
+	$consultapuestoarrayEst = $conxp->query($sqlarraypuestoEst);
+	$recordspuestoarrayEst = $conxp->records_array($consultapuestoarrayEst);
+	$promEst=$recordspuestoarrayEst['Promedio'];
+	//fin consulta promedio estudiante
+	//ubicando puesto segun promedio
+	$countpuesto=1;
+	while($recordspuestoarray = $conxp->records_array($consultapuestoarray)){
+		if($recordspuestoarray['Promedio']==$promEst){
+			break;
+		}else{
+			$countpuesto++;
+		}
+	}
+	//fin ubicar puesto
+	
+    return $countpuesto;
+    
+}
+//----------------------------------------------------------------------------------
+if($existeescala==1){
+    if($formato=="f1"){
+           $sqlest = "SELECT DISTINCT e.apellido1, e.apellido2, e.nombre1, e.nombre2, m.idaula, e.idestudiante 
+			FROM estudiante e, notas n, matricula m 
+        	WHERE e.idestudiante=n.idestudiante AND m.idestudiante=n.idestudiante
+			AND m.idaula=$idaula AND e.habilitado='S' 
+			AND n.periodo=$periodo AND m.periodo='0' 
+			AND n.aniolectivo=$aniolect AND m.aniolectivo=n.aniolectivo
+			AND m.tipo_matricula='R' AND n.tipo_nota=m.tipo_matricula
+			ORDER BY e.apellido1, e.apellido2, e.nombre1, e.nombre2 DESC";
+        	$consultaest = $conx->query($sqlest);
+			//
+            while($records1 = $conx->records_array($consultaest)){
+            	echo 
+                "<div class='fondo'><div style='line-height:7px;'>
+                <table class='normal'>
+                        <tr>
+                            <td width='100px' align='left' rowspan='2' valign='top'>
+                                <span  class='blocktext'><img  src='../../images/logocol.png' width='95' height='95'/></span>
+                            </td>
+                            <td >
+								<span class='ie' align='center'>".($ie)."</span><br/>
+            	                <span class='lema' align='center'>".($lema)."</span><br/>
+            	                <span class='lema' align='center'>".$ciudad."-".$departamento."</span><br/>
+                                
+                            </td>
+                        </tr>
+                        <tr>
+                            <td colspan='2'>
+                            <span class='tituloinforme' align='center'>AÑO LECTIVO $aniolect</span>";
+                                    if($periodo=='4'){
+                                        echo "<span align='center' class='tituloinforme' align='center'><p class='fonttitle6'>INFORME $periodo"."°"." PERIODO</p></span>";        
+                                    }else{
+                                        echo "<span align='center' class='tituloinforme' align='center'><p class='fonttitle6'>INFORME $periodo"."°"." PERIODO</p></span>";        
+									
+									}
+                                echo "
+                            </td>
+                        </tr>
+                        
+                </table>
+            	</div>";
+            	echo "<table class='alumno'>
+            	<tr >
+            	<td colspan='14' class='fonttitle7'   style='width:80%'>ESTUDIANTE:&nbsp;".
+                $records1['nombre1']." ".$records1['nombre2']." ".$records1['apellido1']." ".$records1['apellido2']." (CODIGO: ".$records1['idestudiante'].")
+                <br/>GRADO:&nbsp;".$grado."
+                </td>
+            	</tr>
+            	</table>";
+				//-----------------------------------numero de paginas
+				/*$sql = "SELECT DISTINCT mt.nombre_materia, n.* 
+            	FROM materia mt, notas n WHERE n.idestudiante=".$records1['idestudiante']." 
+				AND mt.idmateria=n.idmateria AND n.periodo=$periodo  AND n.aniolectivo=$aniolect 
+				AND n.tipo_nota='R' ORDER BY mt.nombre_materia ASC";*/
+            	$sql="SELECT *
+					FROM clase c, aula a
+					WHERE a.idaula = c.idaula
+					AND a.idaula =$idaula AND aniolectivo=$aniolect";
+					$consulta2 = $conx->query($sql);
+					//$records2 = $conx->records_array($consulta2);
+					$numasig=0;
+					$numasigimp=0;
+					$asigxpage=0;
+					$numapaginas=0;
+					//$numapaginas=$records2['nunmat']/$pages;
+					while($records2 = $conx->records_array($consulta2)){
+							$numasig++;
+							/*$numasigimp++;
+							if($numasigimp>$pages){
+									$numasigimp=0;
+									$numapaginas++;
+									$asigxpage=$numasig;
+							}*/
+										
+					}
+					$numasig--;
+					//verificar echo $numasig." - ".$asigxpage." - ".$numapaginas;
+					/*if(($numasig-$asigxpage)>0){
+						$numapaginas++;
+					}*/			
+					$numapaginas=round($numasig/$pages,0);
+					if($numasig%$pages==0){
+						$numapaginas++;
+					}
+                //----------------------------------------------------
+                //Generar resultados por asignatura
+                $sql = "SELECT DISTINCT mt.nombre_materia, n.* 
+            	FROM materia mt, notas n WHERE n.idestudiante=".$records1['idestudiante']." 
+				AND mt.idmateria=n.idmateria AND n.periodo=$periodo  AND n.aniolectivo=$aniolect 
+				AND n.tipo_nota='R' ORDER BY mt.nombre_materia ASC";
+            	$consulta2 = $conx->query($sql);
+            	$numasig=0;
+            	$sumComp=0;
+            	$promComp=0;
+                $numasigimp=0;
+				$pagina=1;
+            	while($records2 = $conx->records_array($consulta2)){
+                    	$numasig++;
+						$numasigimp++;
+                        $desct='';
+                        if($records2['vn'] >= (float)$rcbamin and $records2['vn'] <= (float)$rcbamax){
+                    		$desempeno="Db"; 
+                    	}else if($records2['vn'] >= (float)$rcbmin and $records2['vn'] <= (float)$rcbmax){
+                    		$desempeno="DB";
+                    	}else if($records2['vn'] >= (float)$rcamin and $records2['vn'] <= (float)$rcamax){
+                    		$desempeno="DA";
+                    	}else if($records2['vn'] >= (float)$rcsmin and $records2['vn'] <= (float)$rcsmax){
+                    		$desempeno="DS";
+                    	}
+                    	if($desempeno=='Db'){
+                    		$desempeno2="D-";
+                    	}else{
+                    		$desempeno2=$desempeno;
+                    	}
+						$sumComp+=$records2['comportamiento'];/*
+                    	switch($records2['comportamiento']){
+                    		case "DS": $sumDS++; break;
+                    		case "DA": $sumDA++; break;
+                    		case "DB": $sumDB++; break;
+                    		case "D-": $sumDb++; break;
+                    		default: break;
+                    	}*/
+						//docente que tiene la materia 
+                 		$sqld = "SELECT DISTINCT c.ih, d. * 
+                        FROM clase c, docente d
+                        WHERE c.idmateria=  '".$records2['idmateria']."'
+                        AND c.idaula = $idaula
+                        AND c.aniolectivo =  $aniolect
+                        AND c.iddocente = d.iddocente";
+                        $consultad = $conx->query($sqld);
+                		$recordsd = $conx->records_array($consultad);
+                        $docente = $recordsd['nombre1']." ".$recordsd['nombre2']." ".$recordsd['apellido1']." ".$recordsd['apellido2'];
+                        $ih = $recordsd['ih'];
+                        $iddocente = $recordsd['iddocente'];
+                        //descripcion del indicador de desempeño
+						$sql3 = "SELECT DISTINCT i.descripcion 
+                		FROM indicadores i, indicadoresestudiante ib 
+						WHERE i.idindicador=ib.idindicador AND i.idmateria=".$records2['idmateria']."
+						AND i.idaula IN (SELECT idaula FROM aula WHERE grado=$grado_int) 
+                		AND ib.periodo=$periodo AND ib.aniolectivo=$aniolect
+						AND ib.idestudiante=".$records1['idestudiante']." ORDER BY ib.idindicador ASC";
+                		$consulta3 = $conx->query($sql3);
+						$desct="<ul>";
+                		while($records3 = $conx->records_array($consulta3)){
+                		  $desct.="<li style='list-style-type:circle'>".String_oracion($records3['descripcion'])."</li>	";
+						}
+						$desct.="</ul>";
+                       
+                        echo"<br/><table class='resultadoasig'>
+                            <tbody>
+                            <tr style=''>
+                                <td width='100' style='text-align:center;' class='textcn'>".utf8_decode($records2['nombre_materia'])."</td>
+                                <td width='277'><span style='font-style: italic;'>Prof:</span> <span class='textcn'>".$docente."</span></td>
+                                <td width='66' style='text-align:center;' class='textcn'>I.H: $ih</td>
+                                <td width='76' style='text-align:center;' colspan='2' class='textcn'>INASISTENCIAS</td>
+                                <td width='47' style='text-align:center;' class='textcn'>V.N</td>
+                                <td width='96' style='text-align:center;' class='textcn'>DESEMPEÑO</td>
+                            </tr>
+                            <tr style=''>
+                                <td width='499' colspan='3' style='text-align:center; background-color: #E5E5E5;'>Indicadores de Desempeño</td>
+                                <td width='38' valign='top' style='text-align:center;' class='textcn'>CJ</td>
+                                <td width='38' valign='top' style='text-align:center;' class='textcn'>SJ</td>
+                                <td width='47' rowspan='2' style='text-align:center;'><span style='font-weight:bold;'>".number_format((float)$records2['vn'],1,".",",")."</span></td>
+                                <td width='96' rowspan='2' style='text-align:center; '><span style='font-weight:bold;'>".$desempeno."</span></td>
+                            </tr>
+                            <tr >
+                                <td width='499' colspan='3'  ><div align='justify'>".$desct."</div></td>
+                                <td width='38' style='text-align:center;'>".$records2['fj']."</td>
+                                <td width='38' style='text-align:center;'>".$records2['fsj']."</td>
+                            </tr>
+                            </tbody></table>";
+							if($numasigimp>$pages-1){
+									echo "</div><br/><span style='text-align:right; margin-left:700px' class='continuapag'>PAGINA $pagina DE $numapaginas</span><h1 class='SaltoDePagina'> </h1><div class='fondo'><span class='continuapag'>CONTINUA BOLETIN: ".
+									$records1['nombre1']." ".$records1['nombre2']." ".$records1['apellido1']." ".
+									$records1['apellido2']."  &nbsp;&nbsp;&nbsp;$periodo"."°"." PERIODO</span><br/>";
+									$numasigimp=0;
+									$pagina++;
+							}
+                                    
+            	}
+                //------------------COMPORTAMIENTO
+               	$promComp=round($sumComp/$numasig,1);
+            	/*$porcDA=round(($sumDA*100)/$numasig);
+            	$porcDB=round(($sumDB*100)/$numasig);
+            	$porcDb=round(($sumDb*100)/$numasig);*/
+            	$comportamiento="";
+				if($promComp >= $rcbamin && $promComp <= $rcbamax){
+					$comportamiento="Db"; 
+				}else if($promComp >= $rcbmin && $promComp <= $rcbmax){
+					$comportamiento="DB";
+				}else if($promComp >= $rcamin && $promComp <= $rcamax){
+					$comportamiento="DA";
+				}else if($promComp >= $rcsmin && $promComp <= $rcsmax){
+					$comportamiento="DS";
+				}
+            	/*if($porcDS>$porcDA && $porcDS>$porcDB && $porcDS>$porcDb){
+            		if($porcDS>89 && $porcDS<101){
+            			$comportamiento="DS";
+            		}else{
+            			$comportamiento="DA";
+            		}
+            	}else if($porcDA>$porcDS && $porcDA>$porcDB && $porcDA>$porcDb){
+            		if($porcDA>49 && $porcDA<101){
+            			$comportamiento="DA";
+            		}else{
+            			$comportamiento="DB";
+            		}
+            	}else if($porcDB>$porcDS && $porcDB>$porcDA && $porcDB>$porcDb){
+            			$comportamiento="DB";
+            	}else if($porcDb>$porcDS && $porcDb>$porcDA && $porcDb>$porcDB){
+                	if($porcDb>60 && $porcDb<101){
+            			$comportamiento="Db";
+            		}else{
+            			$comportamiento="DB";
+            		}
+            	}
+            	if($comportamiento==""){
+            		$comportamiento="DB";
+            	}*/
+				if($numasigimp>4){
+									echo "</div><br/><span style='text-align:right; margin-left:700px' class='continuapag'>PAGINA $pagina DE $numapaginas</span><h1 class='SaltoDePagina'> </h1><div class='fondo'><span class='continuapag'>CONTINUA BOLETIN: ".
+									$records1['nombre1']." ".$records1['nombre2']." ".$records1['apellido1']." ".
+									$records1['apellido2']."  &nbsp;&nbsp;&nbsp;$periodo"."°"." PERIODO</span><br/>";
+									$numasigimp=0;
+									$pagina++;
+				}
+            	/*echo "<br/>
+                <table class='resultadoasig'>
+                    <tr>
+                	<td scope='col' colspan='6' class='Estilo5' >CONSOLIDADO CONVIVENCIAL</td>
+            		<td scope='col' colspan='10	' class='fonttitle8' ><span style='fon-size:small; font-family: Times New Roman,sans-serif; font-weight:bold;'>$comportamiento: </span>";
+            	$sql3 = "SELECT DISTINCT descripcion 
+            		FROM comportamiento WHERE tipo='$comportamiento' ORDER BY descripcion ASC";
+            		$consulta3 = $conx->query($sql3);
+            	echo "<span style='fon-size:small; font-family: Times New Roman,sans-serif;'> ";
+            		while($records4 = $conx->records_array($consulta3)){
+            		echo String_oracion($records4['descripcion'])." ";
+            		
+            		}
+                echo "</span>
+                    </td>
+                    </tr>
+                </table>"; */   
+                //------------------FIN COMPORTAMIENTO
+                //------------------PUESTO PERIODO Y ANUAL
+                    $sqlTasig = "SELECT DISTINCT idmateria FROM clase WHERE aniolectivo=$aniolect AND idaula=$idaula";
+                	$consultaTasig= $conx->query($sqlTasig);
+                	$numasigProm= $conx->get_numRecords($consultaTasig);
+                	$sqlpuesto = "SELECT AVG( vn ) AS promedio, SUM( vn ) AS sumnotas, n.idestudiante 
+                	FROM notas n, estudiante e, matricula m WHERE m.idaula='$idaula' AND n.idestudiante=e.idestudiante AND n.periodo='$periodo' 
+                    AND m.idestudiante=e.idestudiante AND e.habilitado='S'
+                    AND n.aniolectivo=$aniolect 
+                    AND m.aniolectivo=n.aniolectivo
+					AND m.tipo_matricula='R'
+					AND m.tipo_matricula=n.tipo_nota
+                	GROUP BY n.idestudiante
+                	ORDER BY promedio DESC";
+                	
+                	$consultapuesto = $conx->query($sqlpuesto);
+                	$puesto=1;
+                	$numest= $conx->get_numRecords($consultapuesto);
+                	$notaEstAnt=0;
+                	//Buscar el puesto academico segun resultados
+					$puestoPeriodo= puestoPeriodoAlg2($records1['idestudiante'], $idaula, $aniolect, $periodo);
+					while($recordspuesto = $conx->records_array($consultapuesto)){
+                		if(!($records1['idestudiante']==$recordspuesto['idestudiante'])){
+                			$puesto++;
+                		}else{
+                			$promedio=$recordspuesto['promedio'];
+                			break;
+                		}
+                	}
+                	               
+                	echo "<br/><table class='resultadoasig'>";
+                	if($periodo=='4'){
+                		echo "<tr><td style='text-align:left; font:12px arial,sans-serif;'>
+                		<span style='font:12px bold 	arial,sans-serif; font-weight:bold;' >PROMEDIO GENERAL PERIODO:</span> ".number_format((float)$promedio,2,".",",")." 
+                		<span style='font:12px bold 	arial,sans-serif; font-weight:bold; ' >&nbsp&nbsp&nbsp&nbsp&nbsp&nbspPUESTO: </span>$puestoPeriodo
+                		<span style='font:12px bold 	arial,sans-serif; font-weight:bold;' >DE</span> $numest</td>
+                		";
+                	}else{
+                	
+                		echo "<tr><td style='text-align:left; font:12px 	arial,sans-serif;'>
+                		<span style='font:12px bold 	arial,sans-serif; font-weight:bold;' >PROMEDIO GENERAL PERIODO:</span> ".number_format((float)$promedio,2,".",",")." 
+                		<span style='font:12px bold 	arial,sans-serif; font-weight:bold; ' >&nbsp&nbsp&nbsp&nbsp&nbsp&nbspPUESTO: </span>$puestoPeriodo
+                		<span style='font:12px bold 	arial,sans-serif; font-weight:bold;' >DE</span> $numest</td></tr>";
+                	}
+                	echo "</table><br/>";
+                    /*if($mPerdidas>0 and $mPerdidas <3){
+                        $estadoP= "<span style='color:red;'>"."PROMOCION PENDIENTE,"."</span> Tiene $mPerdidas área(s) reprobada(s)";
+                    }elseif($mPerdidas>2){
+            		      $estadoP= "<span style='color:red;'>"."DEBE REPETIR EL GRADO, "."</span> Tiene $mPerdidas área(s) reprobada(s).";
+                    }elseif($mPerdidas==0){
+                        $estadoP= "FUE PROMOVIDO(A)";
+						
+            			switch($grado){
+            			 case '1': $estadoP="<span style='color:blue;'>".$estadoP." AL GRADO SEGUNDO"; break;
+            			 case '2': $estadoP="<span style='color:blue;'>".$estadoP." AL GRADO TERCERO"; break;
+            			 case '3': $estadoP="<span style='color:blue;'>".$estadoP." AL GRADO CUARTO"; break;
+            			 case '4': $estadoP="<span style='color:blue;'>".$estadoP." AL GRADO QUINTO"; break;
+            			 case '5': $estadoP="<span style='color:blue;'>".$estadoP." AL GRADO SEXTO"; break;
+                         case '6': $estadoP="<span style='color:blue;'>".$estadoP." AL GRADO SEPTIMO"; break;
+            			 case '7': $estadoP="<span style='color:blue;'>".$estadoP." AL GRADO OCTAVO"; break;
+            			 case '8': $estadoP="<span style='color:blue;'>".$estadoP." AL GRADO NOVENO"; break;
+                         case '9': $estadoP="<span style='color:blue;'>".$estadoP." AL GRADO DECIMO"; break;
+            			 case '10': $estadoP="<span style='color:blue;'>".$estadoP." AL GRADO ONCE"; break;
+            	         default: $estadoP=""; break;
+            									
+            			}
+                        $estadoP.=" SEGÚN LO ESTABLECIDO EN EL PEI DEL COLEGIO";
+            		}
+                	
+                    echo "<br/><table class='resultadoasig'>";
+                	if($periodo==4){
+                		echo "<tr><td style='text-align:left; font:12px 	arial,sans-serif;'>
+                		<span style='font:12px bold 	arial,sans-serif; font-weight:bold;' >$estadoP</span></td></tr>";
+                	}
+                   	echo "</table><br/>";*/
+                    
+                    //------------------FIN PUESTO 
+                    //------------------OBSERVACIONES
+                    echo "
+                    <br/><table class='alumno' border='0' cellspacing='5px' >
+                	   <tr >
+                	   <th colspan='2'>
+                	       <p class='Estilo5' align='center'>OBSERVACIONES</p>
+                	   </th>
+                	   </tr>
+                	   <tr>
+                            <td width='30%' align='left' class='Estilo6'>ASIGNATURA</td>
+                            <td  align='left' class='Estilo2' >OBSERVACI&Oacute;N</td>";	
+                			//observaciones generales
+                			$sqlog = "SELECT DISTINCT a.nombre_materia, n.* 
+                            FROM materia a, notas n WHERE n.idestudiante=".$records1['idestudiante']." AND a.idmateria=n.idmateria 
+							AND periodo='$periodo' AND n.aniolectivo=$aniolect 
+							AND n.tipo_nota='R'
+							ORDER BY a.nombre_materia ASC";
+                            $consultaog = $conx->query($sqlog);
+                			while($recordsog = $conx->records_array($consultaog)){
+                			 if($recordsog['observaciones']!=NULL){
+                			     $observaciones=$recordsog['observaciones'];
+                                 $existe = strrpos($observaciones, ".");
+                                 if($existe==false ){
+                				        $observaciones.=".";
+                                 }
+                                echo "<tr>
+                				        <td  class='Estilo1'>".utf8_decode($recordsog['nombre_materia'])."</td>
+                	                   <td align='left' valign='top' style='line-height:15px; text-align:justify'>
+                						<span class='Estilo7' >".
+                						String_oracion($observaciones)."</span>&nbsp;
+                				        </td>
+                                    </tr>";
+                			}
+                	       }
+                        //---------------------------CONVENCIONES
+                        echo "
+                        </table><br/><div class='firma'>
+                        <table class='convenciones'>
+                        <tr>
+                            <td width='150px' colspan='4' valign='center' style='text-align:center; background:#E5E5E5;'>Convenciones</td>
+                        </tr>
+                        <tr>
+                            <td width='45' valign='top'>C.J</td>
+                            <td width='161' valign='top' class='Estilo7'>Con Justificación</td>
+							<td width='45' valign='top'>DS</td>
+                            <td width='161' valign='top' class='Estilo7'>Desempeño Superior [".number_format((float)$rcsmin,1,'.',',')." a ".number_format((float)$rcsmax,1,'.',',')."]</td>
+                        </tr>
+                        <tr>
+                            <td width='45' valign='top'>S.J</td>
+                            <td width='161' valign='top' class='Estilo7' >Sin Justificación</td>
+							<td width='45' valign='top'>DA</td>
+                            <td width='161' valign='top' class='Estilo7'>Desempeño Alto [".number_format((float)$rcamin,1,'.',',')." a ".number_format((float)$rcamax,1,'.',',')."]</td>
+                        </tr>
+                        <tr>
+                            <td width='45' valign='top'>D</td>
+                            <td width='161' valign='top' class='Estilo7' >Definitiva</td>
+							<td width='45' valign='top'>DB</td>
+                            <td width='161' valign='top' class='Estilo7'>Desempeño Básico [".number_format((float)$rcbmin,1,'.',',')." a ".number_format((float)$rcbmax,1,'.',',')."]</td>
+                        </tr>
+                        <tr>
+                            <td width='45' valign='top'>I.H</td>
+                            <td width='161' valign='top' class='Estilo7' >Intensidad Horaria</td>
+							<td width='45' valign='top'>Db</td>
+                            <td width='161' valign='top' class='Estilo7'>Desempeño Bajo [".number_format((float)$rcbamin,1,'.',',')." a ".number_format((float)$rcbamax,1,'.',',')."]</td>
+                        </tr>
+                        <tr>
+                            <td width='45' valign='top'>V.N</td>
+                            <td width='161' valign='top' class='Estilo7' >Valoración Numérica</td>
+							<td width='45' valign='top'></td>
+                            <td width='161' valign='top' class='Estilo7'></td>
+                        </tr>
+                    </table></div>"; 
+						/*$sqldg = "SELECT DISTINCT d.* 
+                        FROM coordinadoresgrupo c, docente d
+                        WHERE c.idaula = $idaula
+                        AND c.aniolectivo =  $aniolect
+                        AND c.iddocente=d.iddocente";*/
+						$sqldg = "SELECT DISTINCT d.* 
+                        FROM clase c, docente d
+                        WHERE c.idaula = $idaula
+                        AND c.aniolectivo =  $aniolect
+                        AND c.idmateria =  27
+                        AND c.iddocente=d.iddocente";
+                        $consultadg = $conx->query($sqldg);
+                		$recordsdg = $conx->records_array($consultadg);
+                        $docentedg = $recordsdg['apellido1']." ".$recordsdg['apellido2']." ".$recordsdg['nombre1']." ".$recordsdg['nombre2'];				
+                	   if($periodo==4){
+							echo 
+							"<div style='line-height:7px;'>
+							<br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/>
+							<table class='firma' border='0'>
+									<tr>
+										<td width='50%' align='center'>
+											<span align='center' class='blocktext' style='text-decoration:overline; font-weight:bold' >Padre de Familia o Acudiente</span>
+										</td>
+										<td align='center'>
+											<span class='blocktext' style='text-decoration:overline; font-weight:bold'>$docentedg</span>
+											<br/><span align='center' class='blocktext' >Director(a) de Grupo</span>
+										</td>
+									</tr>
+							</table>
+							</div>";
+					   
+					   }else{
+							echo 
+							"<div style='line-height:7px;'>
+							<br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/>
+							<table class='firma' border='0'>
+									<tr>
+										<td width='50%' align='center'>
+											<span class='blocktext' style='text-decoration:overline; font-weight:bold'>$docentedg</span>
+											<br/><span align='center' class='blocktext' >Director(a) de Grupo</span>
+						
+										</td>
+										<td align='center'>
+											<br/><span align='center' class='blocktext' style='text-decoration:overline; font-weight:bold' >Padre de Familia o Acudiente</span>
+										</td>
+									</tr>
+							</table>
+							</div>";
+						
+					   }
+					   
+                    	echo "</div><br/><br/><br/><br/><span style='text-align:right; margin-left:700px; position:relative;' class='continuapag'>PAGINA $pagina DE $numapaginas</span><h1 class='SaltoDePagina'></h1>";
+                        
+                	//-------------------------------FIN LADO B------------------------------------------------  
+			}
+	}elseif($formato=="f2"){
+            $sqlest = "SELECT DISTINCT e.apellido1, e.apellido2, e.nombre1, e.nombre2, m.idaula, e.idestudiante 
+			FROM estudiante e, notas n, matricula m 
+        	WHERE e.idestudiante=n.idestudiante AND m.idestudiante=n.idestudiante
+			AND m.idaula='$idaula' AND e.habilitado='S' 
+			AND n.periodo=$periodo AND m.periodo='0' 
+			AND n.aniolectivo=$aniolect AND m.aniolectivo=n.aniolectivo
+			AND m.tipo_matricula='R' AND n.tipo_nota=m.tipo_matricula
+			ORDER BY e.apellido1, e.apellido2, e.nombre1, e.nombre2 DESC";
+        	$consultaest = $conx->query($sqlest);
+			//
+            while($records1 = $conx->records_array($consultaest)){
+            	echo 
+                "<div class='fondo'><div style='line-height:7px;'>
+                <table class='normal'>
+                        <tr>
+                            <td width='100px' align='left' rowspan='2' valign='top'>
+                                <span  class='blocktext'><img  src='../../images/logocol.png' width='95' height='95'/></span>
+                            </td>
+                            <td >
+								<span class='ie' align='center'>".($ie)."</span><br/>
+            	                <span class='lema' align='center'>".($lema)."</span><br/>
+            	                <span class='lema' align='center'>".$ciudad."-".$departamento."</span><br/>
+                                
+                            </td>
+                        </tr>
+                        <tr>
+                            <td colspan='2'>";
+                                    if($periodo=='4'){
+                                        echo "<span align='center' class='tituloinforme' align='center'><p class='fonttitle6'>INFORME $periodo"."°"." PERIODO</p></span>";        
+                                    }else{
+                                        echo "<span align='center' class='tituloinforme' align='center'><p class='fonttitle6'>INFORME $periodo"."°"." PERIODO</p></span>";        
+									
+									}
+                                echo "
+                            </td>
+                        </tr>
+                        
+                </table>
+            	</div>";
+            	echo "<table class='alumno'>
+            	<tr >
+            	<td colspan='14' class='fonttitle7'   style=''><strong>ESTUDIANTE</strong><BR/>".strtoupper(
+                $records1['nombre1']." ".$records1['nombre2']." ".$records1['apellido1']." ".$records1['apellido2'])."</td>
+				<td colspan='14' class='fonttitle7'   style=''><strong>CODIGO</strong><BR/>".$records1['idestudiante']."</td>
+				<td colspan='14' class='fonttitle7'   style=''><strong>CURSO</strong><BR/>".$grado."</td>
+				<td colspan='14' class='fonttitle7'   style=''><strong>AÑO LECTIVO</strong><BR/>".$aniolect."</td>
+            	</tr>
+            	</table>";
+				   	$sql="SELECT *
+					FROM clase c, aula a
+					WHERE a.idaula = c.idaula
+					AND a.idaula =$idaula AND aniolectivo=$aniolect";
+					$consulta2 = $conx->query($sql);
+					$numasig=0;
+					$numasigimp=0;
+					$asigxpage=0;
+					$numapaginas=0;
+					while($records2 = $conx->records_array($consulta2)){
+							$numasig++;
+							
+					}
+					//$numasig--;
+					$numapaginas=round($numasig/$pages,0);
+					if($numasig%$pages!=0){
+						$numapaginas++;
+					}
+                //----------------------------------------------------
+                //Generar resultados por Area/asignatura
+				$sqlarea = "SELECT DISTINCT a.*
+            	FROM area a, clase c, materia m, notas n WHERE a.idarea=m.idarea_fk AND m.idmateria=c.idmateria AND c.idaula=$idaula
+				AND n.tipo_nota='R' AND m.idmateria=n.idmateria
+				AND n.idestudiante=".$records1['idestudiante']."
+				AND n.periodo=$periodo  AND n.aniolectivo=$aniolect
+				AND n.aniolectivo=c.aniolectivo
+				ORDER BY a.nomarea ASC";
+            	$consultaarea = $conx->query($sqlarea);
+				$notaarea=0;
+				$numasig=0;
+				$sumComp=0;
+				$promComp=0;
+				$numasigimp=0;
+				$pagina=1;
+            	while($recordsarea = $conx->records_array($consultaarea)){
+					echo "<br/><table class='area'>
+					<tr >
+					<th class='fonttitle7'   style='' >".
+						strtoupper($recordsarea['nomarea'])."
+					</th>
+					</tr>";
+					$sql = "SELECT DISTINCT mt.nombre_materia, n.* 
+					FROM materia mt, notas n WHERE n.idestudiante=".$records1['idestudiante']." 
+					AND mt.idmateria=n.idmateria AND mt.idarea_fk=".$recordsarea['idarea']." AND n.periodo=$periodo  AND n.aniolectivo=$aniolect 
+					AND n.tipo_nota='R' ORDER BY mt.nombre_materia ASC";
+					$consulta2 = $conx->query($sql);
+					
+					while($records2 = $conx->records_array($consulta2)){
+							$numasig++;
+							$numasigimp++;
+							$desct='';
+							if($records2['vn'] >= (float)$rcbamin and $records2['vn'] <= (float)$rcbamax){
+								$desempeno="Db"; 
+							}else if($records2['vn'] >= (float)$rcbmin and $records2['vn'] <= (float)$rcbmax){
+								$desempeno="DB";
+							}else if($records2['vn'] >= (float)$rcamin and $records2['vn'] <= (float)$rcamax){
+								$desempeno="DA";
+							}else if($records2['vn'] >= (float)$rcsmin and $records2['vn'] <= (float)$rcsmax){
+								$desempeno="DS";
+							}
+							if($desempeno=='Db'){
+								$desempeno2="D-";
+							}else{
+								$desempeno2=$desempeno;
+							}
+							//docente que tiene la materia 
+							$sqld = "SELECT DISTINCT c.ih, c.porc_valorativo, d. * 
+							FROM clase c, docente d
+							WHERE c.idmateria=  '".$records2['idmateria']."'
+							AND c.idaula = $idaula
+							AND c.aniolectivo =  $aniolect
+							AND c.iddocente = d.iddocente";
+							$consultad = $conx->query($sqld);
+							$recordsd = $conx->records_array($consultad);
+							$docente = $recordsd['nombre1']." ".$recordsd['nombre2']." ".$recordsd['apellido1']." ".$recordsd['apellido2'];
+							$ih = $recordsd['ih'];
+							$iddocente = $recordsd['iddocente'];
+							echo
+							//descripcion del indicador de desempeño
+							$sql3 = "SELECT DISTINCT i.descripcion 
+							FROM indicadores i, indicadoresestudiante ib 
+							WHERE i.idindicador=ib.idindicador AND i.idmateria=".$records2['idmateria']."
+							AND i.idaula IN (SELECT idaula FROM aula WHERE grado=$grado_int) 
+							AND ib.periodo=$periodo AND ib.aniolectivo=$aniolect
+							AND ib.idestudiante=".$records1['idestudiante']." ORDER BY ib.idindicador ASC";
+							$consulta3 = $conx->query($sql3);
+							$desct="<ul>";
+							while($records3 = $conx->records_array($consulta3)){
+							  $desct.="<li style='list-style-type:circle'>".String_oracion($records3['descripcion'])."</li>	";
+							}
+							$desct.="</ul>";
+						   
+							echo"<br/><table class='resultadoasig'>
+								<tbody>
+								<tr style=''>
+									<td width='100' style='text-align:center;' class='textcn'>".utf8_decode($records2['nombre_materia'])."<br/><span style='font-size:8px;'>PORCENTAJE CALIF.: ".$recordsd['porc_valorativo']."%</span></td>
+									<td width='450'><span style='font-style: italic;'>Prof:</span> <span class='textcn'>".$docente."</span></td>";
+									if($records2['idmateria']!=27){
+										$colspanind=3;
+										echo "<td width='66' style='text-align:center;' class='textcn'>I.H: $ih</td>
+										<td width='76' style='text-align:center;' colspan='2' class='textcn'>INASISTENCIAS</td>";
+									}else{
+										$colspanind=2;
+									}
+									if($records2['idmateria']!=27){
+										for($i=1; $i<=$periodo; $i++){
+											if($recordsd['porc_valorativo']<100){
+											
+												switch($i){
+													case 1: echo "<td width='38' valign='center' style='text-align:center;' class='textcn' >V.N<br/><span style='font-size:10px'>1er. Periodo</span></td>"; break;
+													case 2: echo "<td width='38' valign='center' style='text-align:center;' class='textcn' >V.N<br/><span style='font-size:10px'>2do. Periodo</span></td>"; break;
+													case 3: echo "<td width='38' valign='center' style='text-align:center;' class='textcn' >V.N<br/><span style='font-size:10px'>3er. Periodo</span></td>"; break;
+													case 4: echo "<td width='38' valign='center' style='text-align:center;' class='textcn' >V.N<br/><span style='font-size:10px'>4to. Periodo</span></td>"; break;
+												}
+											}else{
+												
+												switch($i){
+													case 1: echo "<td width='38' valign='center' style='text-align:center;' class='textcn' >V.N<br/><span style='font-size:10px'>1er. Periodo</span></td>"; break;
+													case 2: echo "<td width='38' valign='center' style='text-align:center;' class='textcn' >V.N<br/><span style='font-size:10px'>2do. Periodo</span></td>"; break;
+													case 3: echo "<td width='38' valign='center' style='text-align:center;' class='textcn' >V.N<br/><span style='font-size:10px'>3er. Periodo</span></td>"; break;
+													case 4: echo "<td width='38' valign='center' style='text-align:center;' class='textcn' >V.N<br/><span style='font-size:10px'>4to. Periodo</span></td>"; break;
+												}
+											}
+											
+										}
+										if($periodo>1){
+											echo "<td width='38' valign='center' style='text-align:center;' class='textcn' >V.N<br/><span style='font-size:10px'>Promediada</span></td>";
+											if($recordsd['porc_valorativo']<100){
+												echo "<td width='38' valign='center' style='text-align:center;' class='textcn' >V.P<br/><span style='font-size:10px'>Promediada</span></td>";
+											}
+											echo "<td width='38' valign='center' style='text-align:center;' class='textcn' >DESEMPEÑO<br/><span style='font-size:10px'>Final<br/>Promediado</span></td>";
+										}else{
+											if($recordsd['porc_valorativo']<100){
+												echo "<td width='38' valign='center' style='text-align:center;' class='textcn' >V.P</td>";
+											
+											}
+											echo "<td width='38' valign='center' style='text-align:center;' class='textcn' >DESEMPEÑO</td>";
+										}
+										
+										
+									}else{
+										echo "<td width='38' valign='center' style='text-align:center;' class='textcn' >V.N</td>";
+										echo "<td width='38' valign='center' style='text-align:center;' class='textcn' >DESEMPEÑO</td>";
+									}
+									
+								echo "</tr>
+								<tr style=''>";
+									
+									if($records2['idmateria']!=27){
+										echo "<td width='499' colspan='$colspanind' style='text-align:center; background-color: #E5E5E5;'>Indicadores de Desempeño</td>
+										<td width='38' valign='top' style='text-align:center;' class='textcn'>CJ</td>
+										<td width='38' valign='top' style='text-align:center;' class='textcn'>SJ</td>";
+									}else{
+										echo "<td width='700' colspan='$colspanind' style='text-align:center; background-color: #E5E5E5;'>Indicadores de Desempeño</td>";
+									
+									}
+									$promedioAcomulado=0;
+									if($records2['idmateria']!=27){
+										for($i=1; $i<=$periodo; $i++){
+											$sqlrecord = "SELECT DISTINCT mt.nombre_materia, n.* 
+											FROM materia mt, notas n WHERE n.idestudiante=".$records1['idestudiante']." 
+											AND mt.idmateria=n.idmateria AND n.idmateria='".$records2['idmateria']."' AND n.periodo=$i  AND n.aniolectivo=$aniolect 
+											AND n.tipo_nota='R'";
+											$consultarecord = $conx->query($sqlrecord);
+											$recordsperiodo = $conx->records_array($consultarecord);
+											if($recordsd['porc_valorativo']<100){
+												$promedioAcomulado+=number_format((float)$recordsperiodo['vn'],1,".",",");
+												if($i==$periodo){
+													echo "<td width='47' style='text-align:center;'  rowspan='2'><span style='font-weight:bold;'>".number_format((float)$recordsperiodo['vn'],1,".",",")."</span></td>";
+											
+												}else{
+													echo "<td width='47' style='text-align:center;'  rowspan='2'><span style=''>".number_format((float)$recordsperiodo['vn'],1,".",",")."</span></td>";
+												}
+											}else{
+												$promedioAcomulado+=number_format((float)$recordsperiodo['vn'],1,".",",");
+												if($i==$periodo){
+													echo "<td width='47' style='text-align:center;'  rowspan='2'><span style='font-weight:bold;'>".number_format((float)$recordsperiodo['vn'],1,".",",")."</span></td>";
+												}else{
+													echo "<td width='47' style='text-align:center;'  rowspan='2'><span style=''>".number_format((float)$recordsperiodo['vn'],1,".",",")."</span></td>";
+												}
+											}
+										}
+										$promedioFinal=number_format((float)$promedioAcomulado/$periodo,1,".",",");
+										if($promedioFinal >= (float)$rcbamin and $promedioFinal <= (float)$rcbamax){
+											$desempenoFinal="Db"; 
+										}else if($promedioFinal >= (float)$rcbmin and $promedioFinal <= (float)$rcbmax){
+											$desempenoFinal="DB";
+										}else if($promedioFinal >= (float)$rcamin and $promedioFinal <= (float)$rcamax){
+											$desempenoFinal="DA";
+										}else if($promedioFinal >= (float)$rcsmin and $promedioFinal <= (float)$rcsmax){
+											$desempenoFinal="DS";
+										}
+										if($recordsd['porc_valorativo']<100){
+											$notaarea+=number_format((float)($promedioFinal*$recordsd['porc_valorativo'])/100,1,".",",");
+										}
+										if($periodo>1){
+											echo "<td width='47' style='text-align:center;'  rowspan='2'><span style='font-weight:bold;'>".number_format((float)$promedioFinal,1,".",",")."</span></td>";
+											if($recordsd['porc_valorativo']<100){
+												echo "<td width='47' style='text-align:center;'  rowspan='2'><span style='font-weight:bold;'>".number_format((float)($promedioFinal*$recordsd['porc_valorativo'])/100,1,".",",")."</span></td>";
+											}
+											echo "<td width='47' style='text-align:center;'  rowspan='2'><span style='font-weight:bold;'>".$desempenoFinal."</span></td>";
+										}else{
+											if($recordsd['porc_valorativo']<100){
+												echo "<td width='47' style='text-align:center;'  rowspan='2'><span style='font-weight:bold;'>".number_format((float)($promedioFinal*$recordsd['porc_valorativo'])/100,1,".",",")."</span></td>";
+											}
+											echo "<td width='47' style='text-align:center;'  rowspan='2'><span style='font-weight:bold;'>".$desempeno."</span></td>";
+										}	
+									}else{
+										echo "<td width='47' style='text-align:center;'  rowspan='2'><span style='font-weight:bold;'>".number_format((float)$records2['vn'],1,".",",")."</span></td>";
+										echo "<td width='47' style='text-align:center;'  rowspan='2'><span style='font-weight:bold;'>".$desempeno."</span></td>";
+									}	
+								echo "
+								</tr>
+								<tr >";
+									if($records2['idmateria']!=27){
+										echo "<td width='499' colspan='$colspanind'  ><div align='justify'>".$desct."</div></td>
+										<td width='38' style='text-align:center;'>".$records2['fj']."</td>
+										<td width='38' style='text-align:center;'>".$records2['fsj']."</td>";
+									}else{
+										echo "<td width='700' colspan='$colspanind'  ><div align='justify'>".$desct."</div></td>";
+
+									}
+									$promedioHist=0;
+								echo "</tr>";
+								
+								echo "</tbody></table>";
+								if($numasigimp>$pages-1){
+										echo "</div><br/><span style='text-align:right; margin-left:700px' class='continuapag'>PAGINA $pagina DE $numapaginas</span><h1 class='SaltoDePagina'> </h1><div class='fondo'><span class='continuapag'>CONTINUA BOLETIN: ".
+										$records1['nombre1']." ".$records1['nombre2']." ".$records1['apellido1']." ".
+										$records1['apellido2']."  &nbsp;&nbsp;&nbsp;$periodo"."°"." PERIODO</span><br/>";
+										$numasigimp=0;
+										$pagina++;
+								}
+										
+					}
+					if($recordsarea['idarea']!=1 && $recordsarea['idarea']!=3){
+						if($notaarea >= (float)$rcbamin and $notaarea <= (float)$rcbamax){
+							$desempeno="Db"; 
+						}else if($notaarea >= (float)$rcbmin and $notaarea <= (float)$rcbmax){
+							$desempeno="DB";
+						}else if($notaarea >= (float)$rcamin and $notaarea <= (float)$rcamax){
+							$desempeno="DA";
+						}else if($notaarea >= (float)$rcsmin and $notaarea <= (float)$rcsmax){
+							$desempeno="DS";
+						}
+						if($desempeno=='Db'){
+							$desempeno2="D-";
+						}else{
+							$desempeno2=$desempeno;
+						}
+						if($periodo>1){
+							echo "<br/><table class='alumno'>
+							<tr >
+							<td colspan='14' class='fonttitle7'   style='width:80%' align='center'>VALORACION NUMERICA DEL AREA HASTA EL $periodo ° PERIODO: ".
+							number_format((float)($notaarea),1,".",",")." ($desempeno)
+							</td>
+							</tr>
+							</table>";
+						}else{
+							echo "<br/><table class='alumno'>
+							<tr >
+							<td colspan='14' class='fonttitle7'   style='width:80%' align='center'>VALORACION NUMERICA DEL AREA: ".
+							number_format((float)($notaarea),1,".",",")." ($desempeno)
+							</td>
+							</tr>
+							</table>";
+						}
+					}
+					
+				}
+				if($numasigimp>4){
+									echo "</div><br/><span style='text-align:right; margin-left:700px' class='continuapag'>PAGINA $pagina DE $numapaginas</span><h1 class='SaltoDePagina'> </h1><div class='fondo'><span class='continuapag'>CONTINUA BOLETIN: ".
+									$records1['nombre1']." ".$records1['nombre2']." ".$records1['apellido1']." ".
+									$records1['apellido2']."  &nbsp;&nbsp;&nbsp;$periodo"."°"." PERIODO</span><br/>";
+									$numasigimp=0;
+									$pagina++;
+				}
+            	
+                    //------------------OBSERVACIONES
+                    echo "
+                    <br/><table class='alumno' border='0' cellspacing='5px' >
+                	   <tr >
+                	   <th colspan='2'>
+                	       <p class='Estilo5' align='center'>OBSERVACIONES</p>
+                	   </th>
+                	   </tr>
+                	   <tr>
+                            <td width='30%' align='left' class='Estilo6'>ASIGNATURA</td>
+                            <td  align='left' class='Estilo2' >OBSERVACI&Oacute;N</td>";	
+                			//observaciones generales
+                			$sqlog = "SELECT DISTINCT a.nombre_materia, n.* 
+                            FROM materia a, notas n WHERE n.idestudiante=".$records1['idestudiante']." AND a.idmateria=n.idmateria 
+							AND periodo='$periodo' AND n.aniolectivo=$aniolect 
+							AND n.tipo_nota='R'
+							ORDER BY a.nombre_materia ASC";
+                            $consultaog = $conx->query($sqlog);
+                			while($recordsog = $conx->records_array($consultaog)){
+                			 if($recordsog['observaciones']!=NULL){
+                			     $observaciones=$recordsog['observaciones'];
+                                 $existe = strrpos($observaciones, ".");
+                                 if($existe==false ){
+                				        $observaciones.=".";
+                                 }
+                                echo "<tr>
+                				        <td  class='Estilo1'>".utf8_decode($recordsog['nombre_materia'])."</td>
+                	                   <td align='left' valign='top' style='line-height:15px; text-align:justify'>
+                						<span class='Estilo7' >".
+                						String_oracion($observaciones)."</span>&nbsp;
+                				        </td>
+                                    </tr>";
+                			}
+                	       }
+                        //---------------------------CONVENCIONES
+                        echo "
+                        </table><br/><div class='firma'>
+                        <table class='convenciones'>
+                        <tr>
+                            <td width='150px' colspan='4' valign='center' style='text-align:center; background:#E5E5E5;'>Convenciones</td>
+                        </tr>
+                        <tr>
+                            <td width='45' valign='top'>C.J</td>
+                            <td width='161' valign='top' class='Estilo7'>Con Justificación</td>
+							<td width='45' valign='top'>DS</td>
+                            <td width='161' valign='top' class='Estilo7'>Desempeño Superior [".number_format((float)$rcsmin,1,'.',',')." a ".number_format((float)$rcsmax,1,'.',',')."]</td>
+                        </tr>
+                        <tr>
+                            <td width='45' valign='top'>S.J</td>
+                            <td width='161' valign='top' class='Estilo7' >Sin Justificación</td>
+							<td width='45' valign='top'>DA</td>
+                            <td width='161' valign='top' class='Estilo7'>Desempeño Alto [".number_format((float)$rcamin,1,'.',',')." a ".number_format((float)$rcamax,1,'.',',')."]</td>
+                        </tr>
+                        <tr>
+                            <td width='45' valign='top'>D</td>
+                            <td width='161' valign='top' class='Estilo7' >Definitiva</td>
+							<td width='45' valign='top'>DB</td>
+                            <td width='161' valign='top' class='Estilo7'>Desempeño Básico [".number_format((float)$rcbmin,1,'.',',')." a ".number_format((float)$rcbmax,1,'.',',')."]</td>
+                        </tr>
+                        <tr>
+                            <td width='45' valign='top'>I.H</td>
+                            <td width='161' valign='top' class='Estilo7' >Intensidad Horaria</td>
+							<td width='45' valign='top'>Db</td>
+                            <td width='161' valign='top' class='Estilo7'>Desempeño Bajo [".number_format((float)$rcbamin,1,'.',',')." a ".number_format((float)$rcbamax,1,'.',',')."]</td>
+                        </tr>
+                        <tr>
+                            <td width='45' valign='top'>V.N</td>
+                            <td width='161' valign='top' class='Estilo7' >Valoración Numérica</td>
+							<td width='45' valign='top'>V.P</td>
+                            <td width='161' valign='top' class='Estilo7'>Valoración Porcentual</td>
+                        </tr>
+                    </table></div>"; 
+						$sqldg = "SELECT DISTINCT d.* 
+                        FROM clase c, docente d
+                        WHERE c.idaula = $idaula
+                        AND c.aniolectivo =  $aniolect
+                        AND c.idmateria =  27
+                        AND c.iddocente=d.iddocente";
+                        $consultadg = $conx->query($sqldg);
+                		$recordsdg = $conx->records_array($consultadg);
+                        $docentedg = $recordsdg['apellido1']." ".$recordsdg['apellido2']." ".$recordsdg['nombre1']." ".$recordsdg['nombre2'];				
+                	   if($periodo==4){
+							echo 
+							"<div style='line-height:7px;'>
+							<br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/>
+							<table class='firma' border='0'>
+									<tr>
+										<td width='50%' align='center'>
+											<span align='center' class='blocktext' style='text-decoration:overline; font-weight:bold' >Padre de Familia o Acudiente</span>
+										</td>
+										<td align='center'>
+											<span class='blocktext' style='text-decoration:overline; font-weight:bold'>$docentedg</span>
+											<br/><span align='center' class='blocktext' >Director(a) de Grupo</span>
+										</td>
+									</tr>
+							</table>
+							</div>";
+					   
+					   }else{
+							echo 
+							"<div style='line-height:7px;'>
+							<br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/>
+							<table class='firma' border='0'>
+									<tr>
+										<td width='50%' align='center'>
+											<span class='blocktext' style='text-decoration:overline; font-weight:bold'>$docentedg</span>
+											<br/><span align='center' class='blocktext' >Director(a) de Grupo</span>
+						
+										</td>
+										<td align='center'>
+											<br/><span align='center' class='blocktext' style='text-decoration:overline; font-weight:bold' >Padre de Familia o Acudiente</span>
+										</td>
+									</tr>
+							</table>
+							</div>";
+						
+					   }
+					   
+                    	echo "</div><br/><br/><br/><br/><span style='text-align:right; margin-left:700px; position:relative;' class='continuapag'>PAGINA $pagina DE $numapaginas</span>";
+						if($pagina<=$numapaginas){
+							echo "<h1 class='SaltoDePagina'></h1>";
+						}
+                        
+                	//-------------------------------FIN LADO B------------------------------------------------  
+			}
+		}
+	
+	}else{
+        echo "No se pueden Generar Boletines por que no existen rango de notas para el año lectivo $aniolect <br/> para configurar presione <a href='../../configuration.php'>aqui</a>";
+	}
+	$conx->close_conex();	
+?>
+
+ <br/>
+
+<span>
+<a href="boletingeneral.php" class="large button orange" style="font-size: 12px !important;">Regresar</a>
+</span>
+<span>
+<a href="javascript: void window.print()" class="large button orange" style="font-size: 12px !important;" >Imprimir</a>
+</span>
+<span>
+<?php
+echo "<a href='boletinExcel.php?aniolect=$aniolect&periodo=$periodo&aula=$idaula&formato=$formato' style='font-size: 12px !important;' >Descargar en formato Excel</a>";
+?>
+</span>
+<span>
+<?php
+echo "<a href='boletinWord.php?aniolect=$aniolect&periodo=$periodo&aula=$idaula&formato=$formato' style='font-size: 12px !important;' >Descargar en formato Word</a>";
+?>
+</span>
+<span>
+<?php
+echo "<a href='boletinPdf.php?aniolect=$aniolect&periodo=$periodo&aula=$idaula&formato=$formato' style='font-size: 12px !important;' >Descargar en formato Pdf</a>";
+?>
+</span>
+</body>
+</html>

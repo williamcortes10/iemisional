@@ -1,0 +1,2 @@
+update indicadores i, copiaindicadores ci SET I.descripcion=ci.descripcion WHERE
+i.idindicador=ci.idindicador

@@ -1,0 +1,379 @@
+<?php
+session_start();
+?>
+<html>
+    <head>
+        <title> ACTUALIZAR NOTAS FINALES - PLANILLA</title>
+        <meta http-equiv="Content-Type" content="text/html; "/>
+        <meta name="description" content="" />
+        <meta name="keywords" content=""/>
+		<link rel="shortcut icon" href="../favicon.ico" type="image/x-icon"/>
+		<link rel="stylesheet" href="../../css/form.css" type="text/css" media="screen"/>
+		<script type="text/javascript" src="../../script/jquery.min.js"></script>
+		<script type="text/javascript" src="../../script/tooltip.js"></script>
+		<script type="text/javascript">
+		$(document).ready(function(){
+			$("#aniolectdiv").show();
+			$("#printer").click(function(event) {
+				$("#aniolectdiv").hide();
+			
+			});
+			$("input:checkbox").click(function(){
+				var id = $(this).attr("value");
+				if($(this).is(":checked")){
+					$("#obs"+id).attr('readonly', true);
+				}else{
+					$("#obs"+id).attr('readonly', false);
+					
+				}
+			});
+		});
+		</script>
+		<style type="text/css">
+			body{
+				background-color: #ffffff; 
+				font-family:"Trebuchet MS", Helvetica, sans-serif;
+				font-size:15px;
+				color: #fff;
+				text-transform:uppercase;
+				overflow-x:hidden;
+}
+			}
+			span.reference{
+				position:fixed;
+				left:0px;
+				bottom:0px;
+				background:#000;
+				width:100%;
+				font-size:10px;
+				line-height:20px;
+				text-align:right;
+				height:50px;
+				-moz-box-shadow:-1px 0px 10px #000;
+				-webkit-box-shadow:-1px 0px 10px #000;
+				box-shadow:-1px 0px 10px #000;
+			}
+			span.reference a{
+				color:#baa;
+				text-transform:uppercase;
+				text-decoration:none;
+				margin-right:10px;
+				
+			}
+			span.reference a:hover{
+				color:#ddd;
+			}
+			.bg_img img{
+				width:100%;
+				position:fixed;
+				top:0px;
+				left:0px;
+				z-index:-1;
+				display: none !important;
+
+			}
+			h1{
+				color: black;
+				font-size:30px;
+				text-align:right;
+				position:none;
+				right:40px;
+				top:350px;
+				font-weight:normal;
+				/*text-shadow:  0 0 3px #0096ff, 0 0 10px #fff, 0 0 20px #fff, 0 0 30px #fff, 0 0 40px #0096ff, 0 0 70px #0096ff, 0 0 80px #0096ff, 0 0 100px #0096ff, 0 0 150px #0096ff;
+			*/}
+			h1 span{
+				display:block;
+				font-size:8px;
+				font-weight:bold;
+			}
+			h2{
+				position:absolute;
+				top:20px;
+				left:50px;
+				font-size:20px;
+				font-weight:normal;
+				/*text-shadow:  0 0 3px #f6ff00, 0 0 10px #fff, 0 0 20px #fff, 0 0 30px #fff, 0 0 40px #f6ff00, 0 0 70px #f6ff00, 0 0 80px #f6ff00, 0 0 100px #f6ff00, 0 0 150px #f6ff00;
+			*/}
+			.tabla{
+				margin:0 auto 0 auto; 
+				width:1000px;
+				color: black;
+                border: 1px solid #000;
+				border-collapse: collapse;
+				padding: 5px;
+
+			}
+			.tabla td , .tabla tr{
+				margin:0 auto 0 auto; 
+				color: black;
+                border: 1px solid #000;
+				border-collapse: collapse;
+				padding: 5px;
+
+			}
+			.anio{
+				margin:0 auto 0 auto; 
+				width:350;
+				color: black;
+				border-collapse: collapse;
+				padding: 5px;
+
+			}
+			.estilocelda{ 
+				background-color:ddeeff; 
+				color:333333; 
+				font-weight:bold; 
+				font-size:16pt; 
+				text-align: center;
+			} 
+			#printer {
+			  width: 28px;
+			  height: 28px;
+			}
+			#back {
+			  width: 28px;
+			  height: 28px;
+			}
+	</style>
+    </head>
+
+    <body>
+	<?php
+		include("../../class/MySqlClass.php");
+		$conx = new ConxMySQL("localhost","root","","appacademy");
+			
+	?>
+		<div class="bg_img"><img src="../../images/1.jpg" alt="background" /></div>
+		<h1>APP ACADEMY<span>La manera mas facil de administrar sus notas y boletines academicos</span>
+		<span>Derechos reservados: williamcortes10@gmail.com</span></h1>
+		</div>
+		<?php
+		$look=false;
+		if (isset($_SESSION['k_username'])) {
+			$conx2 = new ConxMySQL("localhost","root","","appacademy");
+			$sql2 = "SELECT idusuario, apellido1, nombre1, tipousuario FROM usuario, docente 
+			WHERE idusuario='".$_SESSION['k_username']."' and iddocente=idusuario and (tipousuario='D' OR tipousuario='A')";
+			$consulta2 = $conx2->query($sql2);
+			if($conx2->get_numRecords($consulta2)>0){
+				$records2 = $conx2->records_array($consulta2);
+				$look=true;
+				
+			}
+		}else{
+			echo "<div class='form'>
+					<div id='stylized' class='myform'><h3 align='center' style='color:black'>Debes Loguearte</h3><br/>";
+			echo "<span align='center'><a href='../index.php' align='center'>Regresar</a></span></div></div>";
+		}
+		$estudiantes= explode(",", $_GET['estudiantes'] );
+		if($look and !empty($estudiantes[0])){
+		echo "<div class='tabla'>
+		<form id='notas' method='POST' action='updatenotas_responsenf.php'>
+		<table class='tabla'>";
+				$idmateria = $_GET['idmateria'];
+				$aniolect = $_GET['aniolect'];
+				$docente = $_GET['docente'];
+				$idaula = $_GET['idaula'];
+				$flag=false;
+				$numreg=0;
+				$sqlescala ="SELECT rango_superior FROM escala_de_calificacion WHERE tipo_escala='DS'";
+				$qescala = $conx->query($sqlescala);
+				$rowescala = $conx->records_array($qescala);
+				$escalas=$rowescala['rango_superior'];
+				$sqlescala ="SELECT rango_inferior FROM escala_de_calificacion WHERE tipo_escala='D-'";
+				$qescala = $conx->query($sqlescala);
+				$rowescala = $conx->records_array($qescala);
+				$escalai=$rowescala['rango_inferior'];
+				
+				$sql1 = "SELECT DISTINCT nombre1, nombre2, apellido1, apellido2, m.nombre_materia, 
+				a.grado, a.grupo FROM docente d, clase c, materia m, aula a 
+				WHERE d.iddocente=$docente AND c.iddocente=d.iddocente AND c.idmateria= $idmateria AND m.idmateria=c.idmateria 
+				AND c.idaula=$idaula AND c.idaula=a.idaula";
+				$consulta = $conx->query($sql1);
+				$row = $conx->records_array($consulta);
+				echo "<tr><td class='estilocelda' colspan='4'>Ingresar Notas</td></tr>";
+				echo "<tr><td>Docente:".utf8_decode($row['nombre1'])." ".utf8_decode($row['nombre2'])." ".utf8_decode($row['apellido1'])." ".utf8_decode($row['apellido2'])."</td>
+				<td align='right'>Materia:".utf8_decode($row['nombre_materia'])."</td></tr>";
+				echo "<tr><td colspan='2'>Año Lectivo:$aniolect</td>";
+				echo "<tr><td colspan='2'>Grado:".$row['grado']."-G".$row['grupo']."</td></tr></table><br/>";
+				echo "<table class='tabla'>";
+				echo "<tr align='center' class='tabla'>";
+				echo "<td>Nro.</td><td>Estudiante</td><td>CODIGO IND</td><td width='50px'>Comportamiento</td>";
+				echo "</tr>";
+				$numero=0; 	
+				foreach( $estudiantes as $id){
+					echo "<tr>";
+					//seleccionando estudiantes con notas pendientes
+					/*$sql1 = "SELECT DISTINCT e.idestudiante, e.nombre1, e.nombre2, e.apellido1, e.apellido2 FROM estudiante e 
+					WHERE e.idestudiante=$id AND e.idestudiante NOT IN (SELECT n.idestudiante FROM indicadoresestudiantenf n WHERE n.aniolectivo=$aniolect) ORDER BY e.apellido1, e.apellido2, e.nombre1, e.nombre2";*/
+					$sql1 = "SELECT e.idestudiante, e.apellido1, e.apellido2, e.nombre1, e.nombre2, m.idaula 
+					FROM estudiante e, matricula m  
+					WHERE e.idestudiante=m.idestudiante AND e.idestudiante=$id AND e.habilitado='S' 
+					AND m.tipo_matricula='R' AND m.aniolectivo='$aniolect' AND m.idaula=$idaula AND m.idaula IN 
+					(SELECT c.idaula FROM clase c, indicadoresboletin ib, indicadores i WHERE c.iddocente=$docente 
+					AND c.idmateria=$idmateria AND c.aniolectivo=$aniolect AND ib.iddocente=c.iddocente 
+					AND ib.idindicador=i.idindicador AND i.idmateria= c.idmateria) 
+					AND m.idestudiante IN (SELECT n.idestudiante FROM indicadoresestudiantenf n WHERE n.aniolectivo=$aniolect 
+					AND n.idindicador IN (SELECT ibn.idindicador FROM indicadoresestudiantenf ibn WHERE ibn.idestudiante=n.idestudiante)) 
+					ORDER BY e.apellido1, e.apellido2, e.nombre1, e.nombre2 ";
+					$consulta = $conx->query($sql1);
+					///seleccionando indicadores escogidos por el docenbte en esta area y curso
+					$sqlindest = "SELECT * FROM indicadoresboletinnf ib WHERE ib.iddocente=$docente 
+					AND ib.aniolectivo=$aniolect AND ib.idindicador IN (SELECT idindicador FROM indicadores
+					WHERE idmateria=$idmateria AND idaula=$idaula AND 
+					idindicador IN (SELECT e.idindicador FROM indicadoresestudiantenf e WHERE e.aniolectivo=$aniolect AND e.idestudiante=$id ))";
+					$sqlinddoc = "SELECT DISTINCT * FROM indicadoresboletinnf ib WHERE ib.iddocente=$docente 
+					AND ib.aniolectivo=$aniolect AND ib.idindicador IN (SELECT idindicador FROM indicadores
+					WHERE idmateria=$idmateria AND idaula=$idaula)";
+					$consultainddoc = $conx->query($sqlinddoc);
+					if($row = $conx->records_array($consulta)){
+						echo "<td align='center'>".++$numero."</td>";
+						echo "<td width='400px'>".utf8_decode($row['apellido1'])." ".utf8_decode($row['apellido2'])." ".utf8_decode($row['nombre1'])." ".utf8_decode($row['nombre2'])."</td>";
+						echo "<td align='center'>";
+						echo "<select multiple id='ci$id"."[]"."' name='ci$id"."[]"."'>";
+						$flag=0;
+						while ($rowinddoc = $conx->records_array($consultainddoc)) {
+							$consultaindest = $conx->query($sqlindest);
+							while ($rowind = $conx->records_array($consultaindest)) {
+								if($rowind['idindicador']==$rowinddoc['idindicador'] ){
+									echo "<option selected value='".$rowinddoc['idindicador']."'>".$rowinddoc['idindicador']."</option>";
+									$flag=$rowinddoc['idindicador'];
+									break;
+								}
+								
+							}
+							if($rowinddoc['idindicador']!=$flag){
+									echo "<option value='".$rowinddoc['idindicador']."'>".$rowinddoc['idindicador']."</option>";
+									$flag=0;
+								}
+							
+						}
+						$sqlComp= "SELECT DISTINCT comportamiento FROM indicadoresestudiantenf e 
+						WHERE e.aniolectivo=$aniolect AND e.idestudiante=$id AND
+						e.idindicador IN (SELECT idindicador FROM indicadoresboletinnf
+						WHERE iddocente='$docente')";
+						$consultacomp = $conx->query($sqlComp);
+						$rowComp = $conx->records_array($consultacomp);
+						echo "</select>";
+						echo "</td>";
+						echo "<td align='center'><input type='text' id='comp$id' name='comp$id' size='2' maxlength='4' value='".$rowComp['comportamiento']."'/></td>";
+						/*echo "<select id='comp$id' name='comp$id'>";
+							switch($rowComp['comportamiento']){
+							
+								CASE 'DS': echo "<option value='DS' selected>DS</option>
+												<option value='DA'>DA</option>
+												<option value='DB'>DB</option>
+												<option value='D-'>Db</option>"; break;
+								CASE 'DA': echo " <option value='DS'>DS</option>
+												<option value='DA' selected>DA</option>
+												<option value='DB'>DB</option>
+												<option value='D-'>Db</option>";break;
+								CASE 'DB': echo " <option value='DS'>DS</option>
+												<option value='DA'>DA</option>
+												<option value='DB' selected>DB</option>
+												<option value='D-'>Db</option>";break;
+								CASE 'D-': echo " <option value='DS'>DS</option>
+												<option value='DA'>DA</option>
+												<option value='DB'>DB</option>
+												<option value='D-' selected>Db</option>";break;
+												
+							}
+												
+						echo "</select></td>";*/
+						echo "
+						<input type='hidden' id='listdestudiante[]' name='listdestudiante[]' value='$id'></td>
+						<input type='hidden' id='aniolect' name='aniolect' value='$aniolect'></td>
+						<input type='hidden' id='docente' name='docente' value='$docente'></td>";
+						echo "</tr>";
+						echo "<script>
+							$(document).ready(function(){
+								
+								$('#comp$id').change(function(e){
+									e.preventDefault();
+									var num = $('#comp$id').val();
+									var valor = parseFloat(num);
+									if(isNaN(valor)){
+										alert('Debe ingresar un numero');
+										$('#comp$id').focus();
+										$('#comp$id').val('".$rowComp['comportamiento']."');
+									}else{
+										if(valor<$escalai || valor>$escalas){
+											alert('El valor ingresado no esta dentro del rango configurado');
+											$('#comp$id').focus();
+											$('#comp$id').val('".$rowComp['comportamiento']."');
+											
+										}
+									}
+								});
+								
+							});
+						</script>";
+					}
+					
+				}
+			  
+			echo "</table>
+
+			
+			<span align='center'>
+				<input type='submit' id ='btnguardar' value='Actualizar'/>
+			</span>
+		</form>
+		</div>";
+	}
+	?>
+	<div align='center'>
+			<span align='center'>
+				<a href='buscar_estudiantenf.php' class='large button orange' style='font-size: 12px !important;'><img src='../../images/back.png' id='back' alt='Regresar' /></a>
+			</span>
+            <span class="reference">
+				<?php
+					if(isset($records2)){
+					echo "<img src='../../images/profile.png'><a>Usuario: ".utf8_decode($records2['apellido1'])." ".utf8_decode($records2['nombre1'])."
+				     </a><a href='../../docente/logout.php'>Salir</a>";
+					}
+				?>
+                <a href="http://tympanus.net/codrops/2010/11/25/overlay-effect-menu/">Derechos reservados</a>
+				<a href="http://www.flickr.com/photos/duke9042004/" target="_blank">williamcortes10@gmail.com</a>
+            </span>
+		</div>
+	</body>
+</html>
+<?php	
+
+	/*if(!$_POST['indicadores']){
+		echo "<span class='small' style='color:red'>Debe Seleccionar al menos un indicador</span>";
+	}else{
+		$text= "Los siguientes indicadores no se guardaron por que ya fueron seleccionados: ";
+		foreach($_POST['indicadores'] as $id){
+			$values["idindicador"] = MySQL::SQLValue($id);
+			$values["iddocente"]  = MySQL::SQLValue($iddocente);
+			$values["aniolectivo"] = MySQL::SQLValue($aniolect);
+			$values["periodo"] = MySQL::SQLValue($periodo);
+			$sqlinsert=MySQL::BuildSQLInsert("indicadoresboletin", $values);
+			//verificando si ya existe el indicador en la  tabla indicadoresboletin
+			$where = MySQL::BuildSQLWhereClause($values);
+			$sqlduplicateentry = "SELECT * FROM indicadoresboletin $where";
+			$consulta1 = $conx->query($sqlduplicateentry);
+			if($id!=NULL){
+				if($conx->get_numRecords($consulta1)>0){
+					$text.="id $id, ";
+					$flag=true;
+				}else{
+					$consulta = $conx->query($sqlinsert);
+					$numreg++;
+				}
+			}				
+			
+		}
+		if($flag){
+			echo "<span class='small' style='color:red'>$text</span>"; 
+		}
+		if($numreg>0){
+			echo "<span class='small'><img src='../../images/ok.png' width='30' height='30' />Registros guardados con exito $numreg</span>";
+		}
+		if(!$flag and $numreg==0){
+			echo "<div style='color:red; width:400px'><label >Debe Seleccionar al menos un indicador</label></div>";
+		}
+	}*/
+?>

@@ -1,0 +1,228 @@
+<?php
+include('../../class/MySqlClass.php');
+include('../../bdConfig.php');
+$conx = new ConxMySQL($dominio,$usuario,$pass,$bd);
+$periodo = $_POST['periodo'];
+$idmateria = $_POST['idmateria'];
+$aniolectivo = $_POST['aniolectivo'];
+$iddocente = $_POST['iddocente'];
+$limit_end = $_POST['limit_end'];
+$init = $_POST['init'];
+$idaula = $_POST['idaula'];
+$grado = $_POST['grado'];
+//escala de notas
+$existeescala=0;
+$sqlrc = "SELECT tipo_escala, rango_inferior, rango_superior, aniolectivo FROM escala_de_calificacion WHERE aniolectivo = $aniolectivo";
+$consultarc = $conx->query($sqlrc);    
+while($recordsrc = $conx->records_array($consultarc)){
+
+    switch($recordsrc['tipo_escala']){
+		case "DS": 	$rcsmin = $recordsrc['rango_inferior'];
+					$rcsmax = $recordsrc['rango_superior'];
+					break;
+				
+		case "DA": 	$rcamin = $recordsrc['rango_inferior'];
+					$rcamax = $recordsrc['rango_superior'];
+					break;
+		
+		case "DB": 	$rcbmin = $recordsrc['rango_inferior'];
+					$rcbmax = $recordsrc['rango_superior'];
+					break;
+		case "D-": 	$rcbamin = $recordsrc['rango_inferior'];
+					$rcbamax = $recordsrc['rango_superior'];
+					break;
+		default: break;
+	}
+    $existeescala=1;
+}
+//area
+$sqlarea ="SELECT idarea_fk  FROM materia WHERE idmateria = '$idmateria'";
+$qarea = $conx->query($sqlarea);
+$rowarea = $conx->records_array($qarea);
+$area=$rowarea['idarea_fk'];
+/*$sql = "SELECT pc . *, eb.periodo, eb.aniolectivo FROM plan_curricular pc, indicadoresboletin eb
+	WHERE eb.iddocente =$docente
+	AND eb.idindicador = pc.consecutivo
+	AND pc.estandarbc
+	IN ( SELECT codigo FROM estandares WHERE idmateria_fk =$idmateria)
+	AND eb.aniolectivo =$aniolectivo
+	AND eb.periodo =$periodo
+	ORDER BY eb.idindicador DESC";*/
+	if($aniolectivo<2016){
+		$sql = "SELECT DISTINCT pc.consecutivo, pc.grados, pc.competencia, 
+				pc.estandarbc, ebc.descripcion, eb.periodo, eb.aniolectivo 
+				FROM plan_curricular pc, estandares ebc, indicadoresboletin eb, materia m WHERE  
+				(pc.gradoinicio<='$grado' and pc.gradofinal>='$grado') 
+				and pc.estandarbc=ebc.codigo
+				and eb.idindicador=pc.consecutivo and eb.aniolectivo =$aniolectivo
+				and eb.periodo =$periodo and eb.iddocente ='$iddocente' and eb.grado ='$grado'
+				and ebc.idmateria_fk=m.idmateria and m.idarea_fk=$area and eb.idmateria=$idmateria
+				ORDER BY consecutivo DESC";
+	}else{
+		//consultando competencias 
+		$sql="SELECT DISTINCT i.idmateria, p.competencia, p.consecutivo, i.DS, i.DA, i.DB, i.DBA FROM plan_curricular p 
+		JOIN indicadoresboletin i ON p.consecutivo=i.idindicador AND i.aniolectivo='$aniolectivo' AND i.periodo=$periodo AND i.idmateria='$idmateria'
+		JOIN aula a ON i.grado=a.grado AND a.idaula='$idaula'";
+	}
+$consulta = $conx->query($sql);
+if($conx->get_numRecords($consulta)>0){
+	
+			if($aniolectivo<2016){
+				$sql2 = "SELECT DISTINCT pc.consecutivo, pc.grados, pc.competencia, 
+				pc.estandarbc, ebc.descripcion, eb.periodo, eb.aniolectivo 
+				FROM plan_curricular pc, estandares ebc, indicadoresboletin eb, materia m, clase c WHERE  
+				(pc.gradoinicio<='$grado' and pc.gradofinal>='$grado') 
+				and pc.estandarbc=ebc.codigo
+				and eb.idindicador=pc.consecutivo and eb.aniolectivo =$aniolectivo
+				and eb.periodo =$periodo and eb.iddocente ='$iddocente' and eb.grado ='$grado'
+				and ebc.idmateria_fk=m.idmateria and m.idarea_fk=$area AND c.iddocente=eb.iddocente 
+				AND ( c.periodos LIKE  '%$periodo%' and  c.idmateria=$idmateria)
+				AND eb.idmateria=$idmateria
+				ORDER BY consecutivo DESC";
+			}else{
+				$sql2 = "SELECT DISTINCT pc.consecutivo, pc.grados, pc.competencia, 
+				pc.estandarbc, ebc.descripcion, eb.* 
+				FROM plan_curricular pc, estandares ebc, indicadoresboletin eb, materia m, clase c WHERE  
+				(pc.gradoinicio<='$grado' and pc.gradofinal>='$grado') 
+				and pc.estandarbc=ebc.codigo
+				and eb.idindicador=pc.consecutivo and eb.aniolectivo=$aniolectivo
+				and eb.periodo=$periodo and eb.grado ='$grado'
+				and ebc.idmateria_fk=m.idmateria and m.idarea_fk=$area AND c.iddocente='$iddocente' 
+				AND ( c.periodos LIKE  '%$periodo%' and  c.idmateria=$idmateria)
+				AND eb.idmateria=$idmateria
+				ORDER BY consecutivo DESC";
+			}
+$consulta2 = $conx->query($sql2);
+if($conx->get_numRecords($consulta2)>0){
+			if($aniolectivo<2016){
+				$sqlest = "SELECT e.idestudiante, e.apellido1, e.apellido2, e.nombre1, e.nombre2, m.idaula 
+					FROM estudiante e, matricula m  
+					WHERE e.idestudiante=m.idestudiante AND e.habilitado='S' 
+					AND m.tipo_matricula='R' AND m.aniolectivo='$aniolectivo' AND m.idaula=$idaula AND m.idaula IN 
+					(SELECT c.idaula FROM clase c, indicadoresboletin ib, plan_curricular i, aula a WHERE c.iddocente='$iddocente'
+					AND c.idmateria=$idmateria AND c.aniolectivo=$aniolectivo
+					AND ib.iddocente=c.iddocente
+					AND ib.aniolectivo=c.aniolectivo
+					AND ib.periodo=$periodo
+					AND ib.idindicador=i.consecutivo
+					AND c.idaula=a.idaula and a.grado='$grado' AND a.grado=ib.grado) 
+					ORDER BY e.apellido1, e.apellido2, e.nombre1, e.nombre2";
+			}else{
+					/*$sqlest = "SELECT e.idestudiante, e.apellido1, e.apellido2, e.nombre1, e.nombre2, m.idaula 
+					FROM estudiante e, matricula m  
+					WHERE e.idestudiante=m.idestudiante AND e.habilitado='S' 
+					AND m.tipo_matricula='R' AND m.aniolectivo='$aniolectivo' AND m.idaula=$idaula AND m.idaula IN 
+					(SELECT DISTINCT a.idaula FROM indicadoresboletin ib, plan_curricular i, aula a WHERE
+					ib.idmateria=$idmateria AND ib.aniolectivo=$aniolectivo
+					AND ib.periodo=$periodo
+					AND ib.idindicador=i.consecutivo
+					AND a.grado='$grado' AND a.grado=ib.grado) 
+					ORDER BY e.apellido1, e.apellido2, e.nombre1, e.nombre2";*/
+					$sqlest = "SELECT DISTINCT 
+					e.apellido1, e.apellido2, 
+					e.nombre1, e.nombre2, m.idaula, e.idestudiante 
+					FROM estudiante e
+					LEFT JOIN matricula m
+					ON e.idestudiante=m.idestudiante
+					WHERE m.aniolectivo=$aniolectivo
+					AND m.idaula=$idaula
+					AND m.tipo_matricula='R'
+					AND m.periodo=0
+					AND e.habilitado='S'
+					ORDER BY e.apellido1, e.apellido2, e.nombre1, e.nombre2 DESC
+					";
+					
+			}
+			$consultaest = $conx->query($sqlest);
+			echo "<div id='tablacompetencias'><table class='table table-hover table-striped' style='text-align:left;'>";
+			echo "<thead><tr><td colspan='7' align='center' style='font-weight: bold; font-size:18px;'>COMPETENCIAS SELECIONADAS $periodo ° PERIODO $aniolectivo</td></tr>";
+			echo "</thead>";
+			echo "<thead>";
+			echo "<tr>";
+			echo "<th>Codigo</th>";
+			echo "<th width='60%'>Competencia</th>";
+			echo "<th  style='text-align: center;' >DS<br/>($rcsmin - $rcsmax)</th>";
+			echo "<th style='text-align: center;'>DA<br/>($rcamin - $rcamax)</th>";
+			echo "<th style='text-align: center;'>DB<br/>($rcbmin - $rcbmax)</th>";
+			echo "<th style='text-align: center;'>Db<br/>($rcbamin - $rcbamax)</th>";
+			echo "<th></th>";
+			echo"</tr>";
+			echo "</thead>";
+			echo "<tbody>";
+			while ($row = $conx->records_array($consulta2)) {
+				$id = $row['consecutivo'];
+				echo "<tr>";
+				echo "<td>".$row['consecutivo']."</td>";
+				echo "<td>".utf8_encode($row['competencia'])."</td>";
+				echo "<td style='text-align: center;' >".$row['DS']."</td>";
+				echo "<td style='text-align: center;' >".$row['DA']."</td>";
+				echo "<td style='text-align: center;' >".$row['DB']."</td>";
+				echo "<td style='text-align: center;' >".$row['DBA']."</td>";
+				echo "</tr>";
+				
+				
+			}
+			echo "</tbody>";
+			echo "</table></div>";
+?>
+<div class="panel-group" id="accordion" role="tablist" aria-multiselectable="true">
+<?php
+$numreg=1;
+?>
+<?php
+?>
+</div>
+<?php
+}else{
+		?>
+	<div class="jumbotron center-block">
+	<h2 class='alert alert-danger'>Usted no esta habilitado para calificar esta asignatura en este periodo</h2>
+	<p><a class='btn btn-lg btn-success '  href='ingresarcalificaciones.php' role='button'>Volver</a></p>
+	</div>
+		
+	<?php
+}
+		
+}else {
+	
+?>
+	<?php
+	if($aniolectivo<2016){
+	?>
+	<div class="jumbotron center-block">
+		<h2 class='alert alert-danger'>Usted no ha seleccionado competencias para esta asignatura en este periodo</h2>
+		<p><a class='btn btn-lg btn-success '  href='ingresarcalificaciones.php' role='button'>Volver</a></p>
+	</div>
+	<?php
+	}else{
+		$sqlnom="select distinct d.* FROM docente d, jefearea ja, aula a WHERE
+		d.iddocente=ja.iddocente AND ja.idmateria=$idmateria AND ja.aniolectivo=$aniolectivo";
+		$consultanom = $conx->query($sqlnom);
+		$jefearea='';
+		if($conx->get_numRecords($consultanom)>0){
+			$records = $conx->records_array($consulta);
+			$jefearea=$records['nombre1']." ".$records['apellido1']; 
+		}
+	?>
+	
+	<div class="jumbotron center-block">
+		<h2 class='alert alert-danger'>El jefe de area no ha seleccionado competencias para esta asignatura en este periodo<br/>JEFE DE AREA: <?php echo $jefearea;?></h2>
+		<p><a class='btn btn-lg btn-success '  href='ingresarcalificaciones.php' role='button'>Volver</a></p>
+	</div>
+<?php
+	}
+}
+$conx->close_conex();
+?>
+ <script>
+	$("input:checkbox").click(function(){
+		var id = $(this).attr("value");
+		if($(this).is(":checked")){
+			$("#obs"+id).attr('readonly', true);
+		}else{
+			$("#obs"+id).attr('readonly', false);
+			
+		}
+	});
+	//$('.scroll').slimScroll({
+    //});

@@ -1,0 +1,6 @@
+SELECT  ief.idindicador FROM indicadoresestudiantenf ief INNER JOIN matricula m ON ief.idestudiante=m.idestudiante WHERE m.idaula=10 AND m.aniolectivo=2014 AND ief.aniolectivo=m.aniolectivo AND ief.idestudiante='1004616112'
+
+
+
+
+SELECT e.* FROM estudiante e inner join matricula m ON e.idestudiante=m.idestudiante inner join indicadoresestudiantenf ief on e.idestudiante=ief.idestudiante inner join indicadoresboletinnf ibnf on ibnf.idindicador=ief.idindicador inner join indicadores i on i.idindicador=ibnf.idindicador WHERE ief.aniolectivo=2014 AND ief.aniolectivo=ibnf.aniolectivo AND m.aniolectivo=ief.aniolectivo AND i.idmateria=10 AND i.idaula=10

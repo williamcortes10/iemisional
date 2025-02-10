@@ -1,0 +1,12 @@
+<?php
+include('../../class/MySqlClass.php');
+$conx = new ConxMySQL("localhost","root","","appacademy");
+$iddocente = $_POST['iddocente'];
+$idmateria = $_POST['materia'];
+$idaula = $_POST['aula'];
+$aniolectivo = $_POST['aniolect'];
+$sql = "DELETE FROM clase WHERE iddocente='$iddocente' AND idmateria='$idmateria' AND idaula='$idaula' AND aniolectivo='$aniolectivo'";
+$consulta = $conx->query($sql);
+echo "Registro Borrado con exito";
+$conx->close_conex();	
+?>
