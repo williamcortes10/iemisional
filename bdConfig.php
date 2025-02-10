@@ -1,6 +1,6 @@
 <?php
-$usuario='u756951698_notasmisional';
-$bd='u756951698_notasmisional';
+$usuario='u418684922_notasmisional';
+$bd='u418684922_notasmisional';
 $pass='Radamel1006';
 $dominio='localhost';
 if (isset($_SERVER['HTTPS'])) {
@@ -9,5 +9,5 @@ if (isset($_SERVER['HTTPS'])) {
     $protocolo="http";
 }
 $host=$_SERVER["HTTP_HOST"];
-$base_url=$protocolo."://".$host."/notas";
+$base_url=$protocolo."://".$host."/iemisional";
 ?>

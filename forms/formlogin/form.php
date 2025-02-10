@@ -1,6 +1,5 @@
 <?php
 //Datos de Configuración de la app
-include('../../class/MySqlClass.php');
 include('../../config/config.php');
 $conx = new ConxMySQL($dominio,$usuario,$pass,$bd);
 $sql = "SELECT valor FROM appconfig WHERE item='ie'";

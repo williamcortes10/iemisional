@@ -1,7 +1,7 @@
 <?php
-include('class/MySqlClass.php');
-$usuario='u756951698_notasmisional';
-$bd='u756951698_notasmisional';
+include('../../class/MySqlClass.php');
+$usuario='u418684922_notasmisional';
+$bd='u418684922_notasmisional';
 $pass='Radamel1006';
 $dominio='localhost';
 $conx = new ConxMySQL($dominio,$usuario,$pass,$bd);
